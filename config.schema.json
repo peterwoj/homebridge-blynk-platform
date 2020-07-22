@@ -1,0 +1,251 @@
+{
+    "pluginAlias": "BlynkPlatform",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "Optional content to display above the plugin config. Supports markdown.",
+    "footerDisplay": "Optional content to display below the plugin config. Supports markdown.",
+    "form": null,
+    "display": null,
+    "data": {
+        "platform": "BlynkPlatform",
+        "serverurl": "http://mytest/",
+        "devices": [
+            {
+                "manufacturer": "PeterWoj",
+                "name": "HabitController",
+                "token": "1e6aa4f587664ed74c8195842d2f1a8d",
+                "deviceId": "31225",
+                "discover": true
+            },
+            {
+                "manufacturer": "PeterWoj",
+                "name": "OutdoorController",
+                "token": "1e6aa4f587664ed74c8195842d2f1a8d",
+                "deviceId": "112233",
+                "discover": false,
+                "accessories": [
+                    {
+                        "model": "extension-cord",
+                        "name": "Pergola Lights",
+                        "pintype": "VIRTUAL",
+                        "pinnumber": 2,
+                        "type": "BUTTON"
+                    }
+                ]
+            }
+        ]
+    },
+    "layout": [
+        {
+            "key": "platform"
+        },
+        {
+            "type": "flex",
+            "flex-flow": "row wrap",
+            "items": [
+                "serverurl",
+                "pollerseconds"
+            ]
+        },
+        {
+            "key": "devices",
+            "type": "array",
+            "items": [
+                {
+                    "type": "div",
+                    "displayFlex": false,
+                    "flex-direction": "row",
+                    "items": [
+                        {
+                            "key": "devices[].manufacturer"
+                        },
+                        {
+                            "type": "div",
+                            "displayFlex": true,
+                            "flex-direction": "row",
+                            "items": [
+                                {
+                                    "key": "devices[].name"
+                                },
+                                {
+                                    "key": "devices[].deviceId"
+                                }
+                            ]
+                        },
+                        {
+                            "key": "devices[].token"
+                        },
+                        {
+                            "key": "devices[].discover"
+                        },
+                        {
+                            "key": "devices[].accessories",
+                            "type": "array",
+                            "expandable": true,
+                            "expanded": false,
+                            "items": [
+                                {
+                                    "type": "div",
+                                    "displayFlex": false,
+                                    "items": [
+                                        {
+                                            "type": "div",
+                                            "displayFlex": true,
+                                            "flex-direction": "row",
+                                            "items": [
+                                                {
+                                                    "key": "devices[].accessories[].model"
+                                                },
+                                                {
+                                                    "key": "devices[].accessories[].name"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "div",
+                                            "displayFlex": true,
+                                            "flex-direction": "row",
+                                            "items": [
+                                                {
+                                                    "key": "devices[].accessories[].type"
+                                                },
+                                                {
+                                                    "key": "devices[].accessories[].pintype"
+                                                },
+                                                {
+                                                    "key": "devices[].accessories[].pinnumber"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "schema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+            "platform": {
+                "title": "Platform Name",
+                "type": "string",
+                "default": "BlynkPlatform",
+                "readOnly": true
+            },
+            "serverurl": {
+                "title": "Server URL",
+                "type": "string",
+                "placeholder": "http://your.blynkserver.com:8080"
+            },
+            "pollerseconds": {
+                "title": "Refresh",
+                "type": "integer",
+                "default": "10",
+                "description": "in seconds"
+            },
+            "devices": {
+                "type": "array",
+                "expandable": true,
+                "expanded": true,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "title": " Device Name",
+                            "type": "string"
+                        },
+                        "token": {
+                            "title": "Token",
+                            "placeholder": "Auth token",
+                            "type": "string"
+                        },
+                        "deviceId": {
+                            "title": "Device ID",
+                            "placeholder": "Blynk Device ID",
+                            "type": "integer"
+                        },
+                        "manufacturer": {
+                            "title": "Manufacturer",
+                            "placeholder": "Who made the hardware",
+                            "type": "string"
+                        },
+                        "discover": {
+                            "title": "Enable auto discovery",
+                            "type": "boolean"
+                        },
+                        "accessories": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "model": {
+                                        "type": "string",
+                                        "placeholder": "What to display in Homekit for the model"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "placeholder": "Name of the accessory"
+                                    },
+                                    "pintype": {
+                                        "title": "Pin Type",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "title": "Virtual",
+                                                "enum": [
+                                                    "VIRTUAL"
+                                                ]
+                                            },
+                                            {
+                                                "title": "Digital",
+                                                "enum": [
+                                                    "DIGITAL"
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    "pinnumber": {
+                                        "title": "Pin Number",
+                                        "type": "integer",
+                                        "maximum": 255
+                                    },
+                                    "type": {
+                                        "title": "Type",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "title": "Button",
+                                                "const": "BUTTON"
+                                            },
+                                            {
+                                                "title": "Styled Button",
+                                                "const": "STYLED_BUTTON"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "token",
+                        "deviceId",
+                        "manufacturer",
+                        "discover"
+                    ]
+                }
+            }
+        },
+        "required": [
+            "platform",
+            "serverurl",
+            "pollerseconds",
+            "devices"
+        ]
+    }
+}
