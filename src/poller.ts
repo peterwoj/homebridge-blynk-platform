@@ -2,22 +2,38 @@ import { BlynkAccessory } from "./accessories";
 
 
 export class BlynkPoller {
-    private accessory: BlynkAccessory[];
+    private accessories:        BlynkAccessory[];
     private pollerMilliSeconds: number;
-    private oneAtAtime: boolean = false;
+    private oneAtAtime:         boolean = false;
+    private stopPoller:         boolean = false;
 
-    constructor(seconds: number, accessory: BlynkAccessory[]) {
+    constructor(seconds: number, accessories: BlynkAccessory[]) {
         this.pollerMilliSeconds = seconds * 1000;
-        this.accessory = accessory;
+        this.accessories = accessories;
     }
+
+    setPollSeconds(seconds: number) { this.pollerMilliSeconds = seconds * 1000; }
+    
+    // Would be better to tie this to individual add events for each accessory
+    // for now this will do.
+    setPollerAccessoryList(accessories: BlynkAccessory[]): BlynkPoller {
+        this.accessories.length =  0;
+        this.accessories = accessories;
+        console.log(`adding accessories: ${accessories.length}`);
+        return this;
+    }
+
+    shutdown() { this.stopPoller = true; }
 
     poll() {
         if (!this.oneAtAtime) {
             this.oneAtAtime = true;
-            this.accessory.map( acc => acc.getStatus() );
+            this.accessories.forEach( accessory => accessory.getStatus() );
             this.oneAtAtime = false
             
-            setTimeout( () => { this.poll() }, this.pollerMilliSeconds);
+            if (!this.stopPoller) {
+                setTimeout( () => { this.poll() }, this.pollerMilliSeconds);
+            }
         }
         
     }

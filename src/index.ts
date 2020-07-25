@@ -1,152 +1,121 @@
 import {
     API,
+    APIEvent,
+    DynamicPlatformPlugin,
     HAP,
     Logging,
     StaticPlatformPlugin,
     AccessoryPlugin,
+    PlatformAccessory,
     PlatformConfig
 } from "homebridge";
 import { BlynkPoller } from "./poller";
-import { BlynkAccessory, BlynkAccessoryConfig } from "./accessories";
+import { BlynkAccessory } from "./accessories";
 
-const DEFAULT_POLLER_PERIOD:number  = 1;
+import {
+    BlynkConfig,
+    BlynkDeviceConfig,
+} from "./config"
+
+import {
+    BlynkWidgetBase
+} from "./widget"
 
 const PLUGIN_NAME:string        = "homebridge-blynk-platform"
 const PLATFORM_NAME:string      = "BlynkPlatform"
 
+let api: API;
 let hap: HAP;
+let Accessory: typeof PlatformAccessory;
 
 export = (homebridge: API) => {
+    api = homebridge;
     hap = homebridge.hap;
     myConfig;
+    Accessory = homebridge.platformAccessory;
 
     homebridge.registerPlatform(PLUGIN_NAME, PLATFORM_NAME, BlynkPlatform);
 }
 
-class BlynkConfig {
-    platform:       string;
-    serverurl:      string;
-    token:          string;
-    pollerPeriod:   number;
-    devices:        BlynkDeviceConfig[];
+let myConfig: BlynkConfig;
 
-    constructor() {
-        this.platform       = "";
-        this.serverurl      = "";
-        this.token          = "";
-        this.pollerPeriod   = DEFAULT_POLLER_PERIOD;
-        this.devices        = Array<BlynkDeviceConfig>();
-    }
-}
-
-class BlynkDeviceConfig {
-    log:    Logging;
-    maker:  string;
-    name:   string;
-    token:  string;
-    accessories: BlynkAccessoryConfig[];
-
-    constructor(log: Logging, device:Record<string,any>) {
-        this.log = log;
-        this.name = device['name'];
-        this.token = device['token'];
-        this.maker = device['manufacturer'];
-
-        this.accessories = new Array<BlynkAccessoryConfig>();
-
-        this.configAccessories(device['accessories']);
-    }
-
-    toString(): string {
-        return `${this.name} has ${this.accessories.length} item(s).`
-    }
-
-    private configAccessories(accessoriesConfig: Array<Record<string, any>>) {
-        if (accessoriesConfig != null) {
-            accessoriesConfig.map((entry: Record<string, any>, index: number) => {
-                let blynkAcc: BlynkAccessoryConfig = new BlynkAccessoryConfig(entry['name'], entry['pintype'], entry['pinnumber'], this.maker, entry['model'], this.deviceUrl())
-                this.accessories.push(blynkAcc);
-                this.log.info("found: '%s' ", blynkAcc.toString());
-            })
-
-            this.log.info(`accessories found: ${this.accessories.length}`);
-        }
-        else {
-            this.log.warn("no accessories found....");
-        }
-    }
-
-    private deviceUrl(): string {
-        return `${myConfig.serverurl}/${this.token}`
-    }
-}
-
-let myConfig: BlynkConfig = new BlynkConfig();
-
-class BlynkPlatform implements StaticPlatformPlugin {
-    private readonly log:           Logging;
-    private poll?: BlynkPoller;
+class BlynkPlatform implements DynamicPlatformPlugin {
+    private readonly log:       Logging;
+    private readonly accs:      PlatformAccessory[] =  [];
+    
+    private poll:               BlynkPoller;
 
     constructor(log: Logging, config: PlatformConfig, homebridge: API) {
         this.log = log;
+        myConfig  = new BlynkConfig(homebridge.hap, this.log, config);
+        this.poll = new BlynkPoller(myConfig.pollerSeconds, []);
 
-        let wantConfig: Array<string>= ['serverurl', 'pollerseconds', 'platform', 'devices'];
-        for ( let wantKey of wantConfig ) {
-            let confValue: any = config[wantKey];
-            if (confValue == null || confValue === '') {
-                log.error(`Failed to locate configuration for ${ wantKey } unable to continue`);
-            }
-            else {
-                switch (wantKey) {
-                    case "serverurl":
-                        myConfig.serverurl = confValue;
-                        break;
-                    case "pollerseconds":
-                        myConfig.pollerPeriod = parseInt(confValue);
-                        break;
-                    case "platform":
-                        myConfig.platform = confValue;
-                        break;
-                    case "devices":
-                        
-                        break;
-                    default:
-                        log.warn(`Unknown key ${wantKey} was attempted.`)
-                }
-                log.debug("have a key name '%s' -> '%s'", wantKey, config[wantKey]);
-            }
-        }
-        this.configDevices(config["devices"]);
 
-        this.log.info("Blynk Platform is online");
-    }
+        api.on(APIEvent.SHUTDOWN, () => {
+            this.log.info(`${PLATFORM_NAME} is shutting down.`);
+            this.poll.shutdown();
+        });
 
-    private configDevices(devices: Array<Record<string, any>>) {
-        if (devices == null) {
-            return;
-        }
-
-        devices.map((device: Record<string,any>) => {
-            let devConf = new BlynkDeviceConfig( this.log, device );
-            myConfig.devices.push( devConf );
-
-            this.log.debug(`${devConf.toString()}`);
+        api.on(APIEvent.DID_FINISH_LAUNCHING, () => {
+            this.log.info(`${PLATFORM_NAME} has finishing launching.`);
+            this.fetchConfigs();
         });
     }
 
-    accessories(callback: (foundAccessories: AccessoryPlugin[]) => void): void {
+    // A PlatformAccessory must relate to a BlynkAccessory which is configured
+    // by a class which extends BlynkWidgetBase.  Since configureAccessory() is 
+    // triggered before fetchConfigs() only store the cached accessory details.
+    // Wiring accessory events will happen within the related BlynkAccessory.
+    configureAccessory(accessory: PlatformAccessory): void {
+        this.accs.push(accessory);
+    }
+
+    // Once the platform is finished launching, bind the configuration to
+    // events.
+    fetchConfigs() {
+        // Prepare a list of available accessories to
+        //   1. Bind Homebridge to Blynk event
+        //   2. Provide for poller to refresh state
         let plugins: BlynkAccessory[] = new Array<BlynkAccessory>();
 
-        myConfig
-            .devices.map( (device: BlynkDeviceConfig) => {
-                device
-                    .accessories.map((config: BlynkAccessoryConfig) => {
-                        let acc = new BlynkAccessory(hap, this.log, config);
-                        plugins.push( acc );
-                });
+        myConfig.devices.forEach( (device: BlynkDeviceConfig) => {
+            (async() => {
+                // Check to see if this device needs its configuration retrieved.
+                if (device.discover) {
+                    await device.readProject()
+                }
+
+                plugins.concat( 
+                    device.widgets.map( (widget: BlynkWidgetBase) => {
+                        let plugin: BlynkAccessory = new BlynkAccessory(hap, this.log, widget);
+                        
+                        let uuidSeed: string = (widget.getId() > 0) 
+                            ? widget.getId.toString() 
+                            : `${device.deviceId}-${device.manufacturer}-${widget.getModel()}-${widget.getPinType()}-${widget.getPinNumber()}`;
+                        let accId = hap.uuid.generate(uuidSeed);
+                        this.log.debug(`PlatformAccessory: identified ${plugin.name} - ${widget.getId()} [${accId}]`);
+
+                        let haveAcc = this.accs.find( accessory => accessory.UUID === accId);
+                        if (!haveAcc) {
+                            let platAcc = new Accessory(plugin.name, accId);
+                            
+                            plugin.attachAccessory(platAcc);
+                            this.configureAccessory(platAcc);
+                            api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [platAcc]);
+                        }
+                        else {
+                            plugin.attachAccessory(haveAcc);
+                        }
+
+                        return plugin;
+                    })
+                );
+            })();
         });
-        this.poll = new BlynkPoller(myConfig.pollerPeriod, plugins);
-        this.poll.poll();
-        callback( plugins );
+
+        // Start the refresh service
+        this.poll
+            .setPollerAccessoryList(plugins)
+            .poll();
     }
 }
