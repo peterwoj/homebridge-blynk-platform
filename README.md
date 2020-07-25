@@ -50,6 +50,14 @@ Once your configuration is in place startup Homebridge and to get your devices c
 
 ## Changelog
 
+### 0.2.3 Lint This
+
+The fine folks created a linter, so it is good to use one.
+
+### 0.2.2 The Burned Version
+
+CI killed the version number, really I think it would be my fault.
+
 ### 0.2.1 Project Discovery
 
 Enable fetching from the Blynk application to configure accessories.  For a device the parameter `discover` was added to let the Platform know if it should discover available devices are read the configuration file.  If `{ "discover": true }` is found then the `accessories` are ignored if defined.  If there is a change in settings from `discover` being set to false from true, the accessoriesCache will need to be manually updated to avoid item duplication.

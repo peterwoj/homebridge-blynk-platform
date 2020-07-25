@@ -15,20 +15,20 @@ export abstract class BlynkWidgetBase {
     protected pinUrlLabel:          string;
     protected pinLabel:             string;
 
-    constructor(log: Logging, baseUrl: string, widget: Record<string, any>) {
+    constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {
         this.log        = log;
         this.baseUrl    = baseUrl;
 
-        this.id             = widget['id']              ?? 0;
-        this.name           = widget['name']            ?? "Wojstead Button"
-        this.manufacturer   = widget['manufacturer']    ?? "WojStead";
-        this.widgetType     = widget['type']            ?? "BUTTON";
-        this.pinType        = widget['pintype']         ?? "VIRUTAL";
-        this.pinNumber      = widget['pinnumber']       ?? 0;
-        this.pinLabel       = widget['label']           ?? "missing label here...."
-        this.model          = widget['model']           ?? this.pinLabel;
-        this.pinUrlLabel    = (this.pinType.toLowerCase() === 'virtual') 
-                                    ? `V${this.pinNumber}` 
+        this.id             = widget['id']              as number   ?? 0;
+        this.name           = widget['name']            as string   ?? "Wojstead Button"
+        this.manufacturer   = widget['manufacturer']    as string   ?? "WojStead";
+        this.widgetType     = widget['type']            as string   ?? "BUTTON";
+        this.pinType        = widget['pintype']         as string   ?? "VIRUTAL";
+        this.pinNumber      = widget['pinnumber']       as number   ?? 0;
+        this.pinLabel       = widget['label']           as string   ?? "missing label here...."
+        this.model          = widget['model']           as string   ?? this.pinLabel;
+        this.pinUrlLabel    = (this.pinType.toLowerCase() === 'virtual')
+                                    ? `V${this.pinNumber}`
                                     : `${this.pinNumber}`
     }
 
@@ -63,28 +63,28 @@ export class BlynkWidgetButton extends BlynkWidgetBase {
     private maxValue:       number;
     private curValue:       number;
 
-    constructor(log: Logging, baseUrl: string, widget: Record<string, any>) {
+    constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {
         super(log, baseUrl, widget);
-        this.minValue   = widget['min']     ?? 0.0;
-        this.maxValue   = widget['max']     ?? 1.0;
-        this.curValue   = widget['value']   ?? 0;
+        this.minValue   = widget['min']     as number   ?? 0.0;
+        this.maxValue   = widget['max']     as number   ?? 1.0;
+        this.curValue   = widget['value']   as number   ?? 0;
     }
 
-    setPin()    {
+    setPin(): string {
         return `${this.baseUrl}/update/${this.pinUrlLabel}?value=${this.curValue}`;
     }
-    setValue(value: string) {
+    setValue(value: string): void {
         if (value === "true") {
             value = this.SWITCH_ON;
         }
         else if (value === 'false') {
             value = this.SWITCH_OFF;
-        }   
+        }
         this.curValue = (value === this.SWITCH_ON) ? 1 : 0;
     }
-    getValue()  { return this.curValue; }
-    getMin()    { return this.minValue; }
-    getMax()    { return this.maxValue; }
+    getValue(): number  { return this.curValue; }
+    getMin():   number  { return this.minValue; }
+    getMax():   number  { return this.maxValue; }
 
     toString(): string { return super.toString(); }
 }

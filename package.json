@@ -1,48 +1,57 @@
 {
-  "name": "homebridge-blynk-platform",
-  "version": "0.2.2",
-  "description": "Homebridge plugin for the Blynk platform",
-  "main": "dist/index.js",
-  "scripts": {
-    "clean": "rimraf ./dist",
-    "build": "rimraf ./dist && tsc",
-    "prepublishOnly": "npm run build",
-    "postpublish": "npm run clean",
-    "start": "npm run build ; ./node_modules/homebridge -D -P ."
-  },
-  "author": {
-    "name": "Peter J Wojciechowski",
-    "email": "peterwoj@dwellersoul.com"
-  },
-  "engines": {
-    "homebridge": ">=1.0.0"
-  },
-  "keywords": [
-    "homebridge-plugin",
-    "Blynk",
-    "IoT",
-    "Siri"
-  ],
-  "license": "MIT",
-  "files": [
-    "dist", "config.schema.json"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/peterwoj/homebridge-blynk-platform.git"
-  },
-  "bugs": {
-    "url": "https://github.com/peterwoj/homebridge-blynk-platform/issues"
-  },
-  "devDependencies": {
-    "@types/node": "10.17.19",
-    "typescript": "^3.9.2",
-    "rimraf": "^3.0.2",
-    "homebridge": "^1.1.1",
-    "homebridge-config-ui-x": "^4.23.2"
-  },
-  "homepage": "https://github.com/peterwoj/homebridge-blynk-platform",
-  "dependencies": {
-    "got": "^11.5.0"
-  }
+    "name": "homebridge-blynk-platform",
+    "displayName": "Homebridge Blynk Platform",
+    "version": "0.2.3",
+    "description": "Homebridge plugin for the Blynk platform",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "rimraf ./dist && npm run lint && tsc",
+        "clean": "rimraf ./dist",
+        "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+        "prepublishOnly": "npm run build",
+        "postpublish": "npm run clean",
+        "start": "npm run build && ./node_modules/homebridge -D -P ."
+    },
+    "author": {
+        "name": "Peter J Wojciechowski",
+        "email": "peterwoj@dwellersoul.com"
+    },
+    "engines": {
+        "node": ">=10.17.0",
+        "homebridge": ">=1.0.0"
+    },
+    "license": "MIT",
+    "files": [
+        "dist",
+        "config.schema.json"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/peterwoj/homebridge-blynk-platform.git"
+    },
+    "bugs": {
+        "url": "https://github.com/peterwoj/homebridge-blynk-platform/issues"
+    },
+    "devDependencies": {
+        "@types/node": "10.17.19",
+        "@typescript-eslint/eslint-plugin": "^3.7.0",
+        "@typescript-eslint/parser": "^3.7.0",
+        "eslint": "^7.5.0",
+        "homebridge": "^1.1.1",
+        "homebridge-config-ui-x": "^4.24.0",
+        "rimraf": "^3.0.2",
+        "typescript": "^3.9.7"
+    },
+    "homepage": "https://github.com/peterwoj/homebridge-blynk-platform",
+    "dependencies": {
+        "got": "^11.5.0"
+    },
+    "keywords": [
+        "homebridge blynk",
+        "homebridge",
+        "homebridge-plugin",
+        "Blynk",
+        "IoT",
+        "Siri"
+    ]
 }

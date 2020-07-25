@@ -1,6 +1,10 @@
 {
     "compilerOptions": {
         "target": "ES2018",
+        "declaration": true,
+        "removeComments": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
         "module": "commonjs",
         "lib": [
             "ES2018"
@@ -8,10 +12,11 @@
         "sourceMap": true,
         "rootDir": "src",
         "outDir": "dist",
-
         "strict": true,
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true
     },
-    "include": [ "src" ]
-  }
+    "include": [
+        "src"
+    ]
+}

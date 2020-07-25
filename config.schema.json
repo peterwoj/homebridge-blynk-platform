@@ -219,11 +219,15 @@
                                         "oneOf": [
                                             {
                                                 "title": "Button",
-                                                "const": "BUTTON"
+                                                "enum": [
+                                                    "BUTTON"
+                                                ]
                                             },
                                             {
                                                 "title": "Styled Button",
-                                                "const": "STYLED_BUTTON"
+                                                "enum": [
+                                                    "STYLED_BUTTON"
+                                                ]
                                             }
                                         ]
                                     }
