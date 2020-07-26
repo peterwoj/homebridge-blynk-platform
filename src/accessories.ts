@@ -1,12 +1,12 @@
 import {
-    CharacteristicEventTypes, 
-    CharacteristicGetCallback, 
+    CharacteristicEventTypes,
+    CharacteristicGetCallback,
     CharacteristicSetCallback,
-    CharacteristicValue, 
-    HAP, 
-    Logging, 
+    CharacteristicValue,
+    HAP,
+    Logging,
     PlatformAccessory,
-    Service, 
+    Service,
 } from "homebridge";
 
 import { BlynkWidgetBase } from "./widget"
@@ -33,12 +33,12 @@ export class BlynkAccessory {
         this.log.debug(`Switch ${this.name} has been created`);
     }
 
-    attachAccessory(accessory: PlatformAccessory) {
+    attachAccessory(accessory: PlatformAccessory): void {
         this.accessory = accessory;
 
         this.accessory.displayName = this.name;
 
-        this.switchService = this.accessory.getService(this.hap.Service.Switch) 
+        this.switchService = this.accessory.getService(this.hap.Service.Switch)
             ?? this.accessory.addService(this.hap.Service.Switch);
         this.switchService
             .getCharacteristic(this.hap.Characteristic.On)
@@ -48,7 +48,7 @@ export class BlynkAccessory {
 
         this.switchService.getCharacteristic(this.hap.CharacteristicEventTypes.GET)?.getValue()
 
-        this.infoService = accessory.getService(this.hap.Service.AccessoryInformation) 
+        this.infoService = accessory.getService(this.hap.Service.AccessoryInformation)
             ?? this.accessory.addService(this.hap.Service.AccessoryInformation);
 
         this.infoService
@@ -59,7 +59,7 @@ export class BlynkAccessory {
         this.log.debug(`Switch ${this.name} has been attached`);
     }
 
-    getOnHandler(callback: CharacteristicGetCallback) {
+    getOnHandler(callback: CharacteristicGetCallback): void {
         try {
             this.getSwitchValue()
             callback(undefined, this.myConfig.getValue());
@@ -80,25 +80,25 @@ export class BlynkAccessory {
                 this.log.warn(`${this.myConfig.getPin()}`);
                 throw error;
         });
-        
+
         return false;
     }
 
-    setOnHandler(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    setOnHandler(value: CharacteristicValue, callback: CharacteristicSetCallback): void {
         this.myConfig.setValue(value.toString());
         this.log.info(this.myConfig.setPin());
         this.requestUrl(this.myConfig.setPin())
-            .then((body: string) => {
+            .then(() => {
                 callback();
             })
             .catch((error) => {
                 this.log.warn(`Unable to set ${this.name}: ${error.message}`);
             });
     }
-    
+
     private async requestUrl(url: string): Promise<string> {
         try {
-            let response = await this.got(url);
+            const response = await this.got(url);
             return response.body;
         } catch (error) {
             throw new Error(error);
@@ -110,7 +110,7 @@ export class BlynkAccessory {
      */
     getStatus(): void {
         try {
-            let onCharacter = this.switchService?.getCharacteristic(this.hap.Characteristic.On)
+            const onCharacter = this.switchService?.getCharacteristic(this.hap.Characteristic.On)
             if (!onCharacter) { throw new Error(`Service missing on ${this.name}`)}
             onCharacter.getValue();
             onCharacter.updateValue( this.myConfig.getValue() );
@@ -119,18 +119,4 @@ export class BlynkAccessory {
             this.log.warn(`problem refresh state: ${error}`)
         }
     }
-
-    /*
-    -- AccessoryPlugin implementation
-    identify(): void {
-        this.log(`Identify yourself ${this.myConfig.getName()}`);
-    }
-
-    getServices(): Service[] {
-        return [
-            this.infoService,
-            this.switchService
-        ];
-    }
-    */
 }
