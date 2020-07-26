@@ -50,6 +50,10 @@ Once your configuration is in place startup Homebridge and to get your devices c
 
 ## Changelog
 
+### 0.2.4 ...
+
+The 0.2.3 release...
+
 ### 0.2.3 Lint This
 
 The fine folks created a linter, so it is good to use one.
