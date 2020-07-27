@@ -44,7 +44,8 @@
     },
     "homepage": "https://github.com/peterwoj/homebridge-blynk-platform",
     "dependencies": {
-        "got": "^11.5.0"
+        "got": "^11.5.0",
+        "semver": "^7.3.2"
     },
     "keywords": [
         "homebridge blynk",
