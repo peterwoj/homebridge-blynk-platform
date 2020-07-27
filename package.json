@@ -1,7 +1,7 @@
 {
     "name": "homebridge-blynk-platform",
     "displayName": "Homebridge Blynk Platform",
-    "version": "0.2.4",
+    "version": "0.2.5-beta.0",
     "description": "Homebridge plugin for the Blynk platform",
     "main": "dist/index.js",
     "scripts": {
