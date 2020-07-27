@@ -1,7 +1,7 @@
 {
     "name": "homebridge-blynk-platform",
     "displayName": "Homebridge Blynk Platform",
-    "version": "0.2.4",
+    "version": "0.2.5-beta.0",
     "description": "Homebridge plugin for the Blynk platform",
     "main": "dist/index.js",
     "scripts": {
@@ -44,7 +44,8 @@
     },
     "homepage": "https://github.com/peterwoj/homebridge-blynk-platform",
     "dependencies": {
-        "got": "^11.5.0"
+        "got": "^11.5.0",
+        "semver": "^7.3.2"
     },
     "keywords": [
         "homebridge blynk",
