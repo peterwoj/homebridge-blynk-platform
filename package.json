@@ -1,7 +1,7 @@
 {
     "name": "homebridge-blynk-platform",
     "displayName": "Homebridge Blynk Platform",
-    "version": "0.2.5-beta.0",
+    "version": "0.2.5-beta.1",
     "description": "Homebridge plugin for the Blynk platform",
     "main": "dist/index.js",
     "scripts": {
@@ -10,7 +10,7 @@
         "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
         "prepublishOnly": "npm run build",
         "postpublish": "npm run clean",
-        "start": "npm run build && ./node_modules/homebridge -D -P ."
+        "start": "npm run build && ./node_modules/homebridge/bin/homebridge -I -D -P ."
     },
     "author": {
         "name": "Peter J Wojciechowski",
