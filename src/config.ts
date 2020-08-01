@@ -138,10 +138,15 @@ export class BlynkDeviceConfig {
                     "model": "accessory model"
                 }
             */
-            accList.forEach((acc: Record<string, string | number>) => {
-                const accItem: BlynkWidgetButton = new BlynkWidgetButton(this.log, this.serverUrl, acc);
-                this.widgets.push(accItem);
-            });
+           if (accList.length > 0) {
+                accList.forEach((acc: Record<string, string | number>) => {
+                    const accItem: BlynkWidgetButton = new BlynkWidgetButton(this.log, this.serverUrl, acc);
+                    this.widgets.push(accItem);
+                });
+            }
+            else {
+                this.log.warn(`Accessories were not defined and discover is set to false.`);
+            }
         }
         else {
             this.deviceId = config['deviceId'] as number
