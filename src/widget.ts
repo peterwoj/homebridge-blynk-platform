@@ -29,7 +29,7 @@ export abstract class BlynkWidgetBase {
         this.model          = widget['model']           as string   ?? this.pinLabel;
         this.pinUrlLabel    = (this.pinType.toLowerCase() === 'virtual')
                                     ? `V${this.pinNumber}`
-                                    : `${this.pinNumber}`
+                                    : `D${this.pinNumber}`
     }
 
     getId():            number { return this.id; }
