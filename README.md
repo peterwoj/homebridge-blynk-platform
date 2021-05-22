@@ -55,6 +55,11 @@ Once your configuration is in place startup Homebridge and to get your devices c
 
 ## Changelog
 
+### 0.2.6
+
+* Bug fixes 
+ * #12 Missing 'D' from the digital pin requests 
+
 ### 0.2.5
 
 Bug fixes to account for discovery on a device which has multiple accessories associated with it.
