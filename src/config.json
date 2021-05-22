@@ -1,0 +1,28 @@
+{
+    "platform": "BLynkPlatform",
+    "serverurl": "http://wwww.blynk.server",
+    "pollerperiod": "seconds",
+    "devices": [
+        {
+            "name": "blynk app name",
+            "token": "auth  token",
+            "manufacturer": "who_done_it",
+            "discover": true
+        },
+        {
+            "name": "blynk app name",
+            "token": "auth  token",
+            "manufacturer": "who_done_it",
+            "discover": false,
+            "accessories": [
+                {
+                    "name": "item name",
+                    "type": "BUTTON",
+                    "pintype": "virtual",
+                    "pinnumber": "1",
+                    "model": "accessory model"
+                }
+            ]
+        }
+    ]
+}

@@ -1,7 +1,4 @@
 import {
-    CharacteristicEventTypes,
-    CharacteristicGetCallback,
-    CharacteristicSetCallback,
     CharacteristicValue,
     HAP,
     Logging,
@@ -14,7 +11,7 @@ import { BlynkWidgetBase } from "./widget"
 export class BlynkAccessory {
     private readonly log: Logging;
     private readonly hap: HAP;
-    private switchService?: Service;
+    private accessoryService?: Service;
     private infoService?: Service;
     private accessory?: PlatformAccessory;
 
@@ -38,15 +35,28 @@ export class BlynkAccessory {
 
         this.accessory.displayName = this.name;
 
-        this.switchService = this.accessory.getService(this.hap.Service.Switch)
-            ?? this.accessory.addService(this.hap.Service.Switch);
-        this.switchService
-            .getCharacteristic(this.hap.Characteristic.On)
-                .on(CharacteristicEventTypes.GET, this.getOnHandler.bind(this))
-                .on(CharacteristicEventTypes.SET, this.setOnHandler.bind(this))
-        ;
+        let serviceType = this.hap.Service.Switch;
+        if (this.myConfig.getWidgetType() === "SLIDER") {
+            serviceType = this.hap.Service.Lightbulb;
+        }
 
-        this.switchService.getCharacteristic(this.hap.CharacteristicEventTypes.GET)?.getValue()
+        this.accessoryService = this.accessory.getService(serviceType)
+            ?? this.accessory.addService(serviceType);
+
+        this.accessoryService
+            .getCharacteristic(this.hap.Characteristic.On)
+                .onGet(this.getOnHandler.bind(this))
+                .onSet(this.setOnHandler.bind(this));
+
+        if (this.myConfig.getWidgetType() === "SLIDER") {
+            this.accessoryService
+                .getCharacteristic(this.hap.Characteristic.Brightness)
+                    .onGet(this.getBrightnessHandler.bind(this))
+                    .onSet(this.setBrightnessHandler.bind(this));
+
+        }
+
+        this.accessoryService.getCharacteristic(this.hap.CharacteristicEventTypes.GET)?.getValue()
 
         this.infoService = accessory.getService(this.hap.Service.AccessoryInformation)
             ?? this.accessory.addService(this.hap.Service.AccessoryInformation);
@@ -59,50 +69,21 @@ export class BlynkAccessory {
         this.log.debug(`Switch ${this.name} has been attached`);
     }
 
-    getOnHandler(callback: CharacteristicGetCallback): void {
-        try {
-            this.getSwitchValue()
-            callback(undefined, this.myConfig.getValue());
-        }
-        catch (error) {
-            callback(error, this.myConfig.getValue());
-        }
+    getBrightnessHandler(): number {
+        return this.myConfig.getValue();
     }
 
-    private getSwitchValue(): boolean {
-        this.requestUrl(this.myConfig.getPin())
-            .then((body: string) => {
-                this.myConfig.setValue(body);
-                return true;
-            })
-            .catch((error) => {
-                this.log.warn(`request for status failed: ${error}`);
-                this.log.warn(`${this.myConfig.getPin()}`);
-                throw error;
-        });
-
-        return false;
+    setBrightnessHandler(value: CharacteristicValue): void {
+        this.myConfig.setValue(`["${value.toString()}"]`);
     }
 
-    setOnHandler(value: CharacteristicValue, callback: CharacteristicSetCallback): void {
+    getOnHandler(): boolean {
+        return this.myConfig.getValue() > 0.1;
+    }
+
+    // value: either true or false based on setting of the widget in homebridge
+    setOnHandler(value: CharacteristicValue): void {
         this.myConfig.setValue(value.toString());
-        this.log.info(this.myConfig.setPin());
-        this.requestUrl(this.myConfig.setPin())
-            .then(() => {
-                callback();
-            })
-            .catch((error) => {
-                this.log.warn(`Unable to set ${this.name}: ${error.message}`);
-            });
-    }
-
-    private async requestUrl(url: string): Promise<string> {
-        try {
-            const response = await this.got(url);
-            return response.body;
-        } catch (error) {
-            throw new Error(error);
-        }
     }
 
     /**
@@ -110,10 +91,18 @@ export class BlynkAccessory {
      */
     getStatus(): void {
         try {
-            const onCharacter = this.switchService?.getCharacteristic(this.hap.Characteristic.On)
+            const onCharacter = this.accessoryService?.getCharacteristic(this.hap.Characteristic.On)
             if (!onCharacter) { throw new Error(`Service missing on ${this.name}`)}
-            onCharacter.getValue();
-            onCharacter.updateValue( this.myConfig.getValue() );
+
+            onCharacter.updateValue( this.myConfig.getValue() > 0.1 );
+
+            if (this.myConfig.getWidgetType() === "SLIDER") {
+                const bright = this.accessoryService?.getCharacteristic(this.hap.Characteristic.Brightness)
+                if (bright) {
+                    this.log.info(`bright(${this.myConfig.getValue()}) on ${this.myConfig.getName()}`);
+                    bright.updateValue( this.myConfig.getValue() );
+                }
+            }
         }
         catch (error) {
             this.log.warn(`problem refresh state: ${error}`)
