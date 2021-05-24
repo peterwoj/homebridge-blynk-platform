@@ -99,7 +99,7 @@ export class BlynkAccessory {
             if (this.myConfig.getWidgetType() === "SLIDER") {
                 const bright = this.accessoryService?.getCharacteristic(this.hap.Characteristic.Brightness)
                 if (bright) {
-                    this.log.info(`bright(${this.myConfig.getValue()}) on ${this.myConfig.getName()}`);
+                    this.log.debug(`Dimmer(${this.myConfig.getName()}).brightness: ${this.myConfig.getValue()}`);
                     bright.updateValue( this.myConfig.getValue() );
                 }
             }
