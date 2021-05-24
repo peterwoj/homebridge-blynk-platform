@@ -5,7 +5,9 @@ import {
 
 import {
     BlynkWidgetBase,
-    BlynkWidgetButton
+    BlynkWidgetButton,
+    BlynkWidgetDimmer,
+    IBlynkWidget,
 } from "./widget"
 
 /*
@@ -30,9 +32,18 @@ import {
                 {
                     "name": "item name",
                     "type": "BUTTON",
+                    "typeOf": "subclass of type",
                     "pintype": "virtual",
                     "pinnumber": "1",
-                    "model": "accessory model"
+                    "model": "accessory model",
+                },
+                {
+                    "name": "item name",
+                    "type": "LABEL",
+                    "typeOf": "temperature",
+                    "pintype": "virtual",
+                    "pinnumber": "1",
+                    "model": "accessory model",
                 }
             ]
         }
@@ -76,30 +87,36 @@ export class BlynkConfig {
             }
         }
 
-        this.platform       = String(config['platform'])        ?? "BlynkPlatform";
-        this.pollerSeconds  = Number(config['pollerseconds'])   ?? 10;
+        this.platform       = String(config['platform'])        || "BlynkPlatform";
+        this.pollerSeconds  = Number(config['pollerseconds'])   || 10;
 
         this.devices = new Array<BlynkDeviceConfig>();
 
-        const confDevices: Record<string, string>[] = config['devices'] as Record<string, string>[];
-        confDevices.forEach((device: Record<string, string>) => {
-            const deviceConfig = new BlynkDeviceConfig(this.hap, this.log, this.baseUrl, device);
-            this.devices.push(deviceConfig);
-        });
+        const confDevices: Record<string, string | number>[] = config['devices'] as Record<string, string | number>[];
+        if (confDevices != undefined) {
+            confDevices.forEach((device: Record<string, string|number>) => {
+                const deviceConfig = new BlynkDeviceConfig(this.hap, this.log, this.baseUrl, device);
+                this.devices.push(deviceConfig);
+            });
+        }
+        else {
+            log.error("Devices are missing from your configuration");
+        }
     }
 }
 
+// Blynk Device is each microcontroller attached to a project
 export class BlynkDeviceConfig {
     private readonly NEED_CONFIG:   string[] = ['name', 'token'];
     private readonly hap:           HAP;
     private readonly log:           Logging;
     private readonly serverUrl:     string;
-    readonly token:         string  = "";
-    readonly manufacturer:  string;
-    readonly discover:      boolean;
-    readonly deviceId:      number  = 0;
+    readonly token:                 string  = "";
+    readonly manufacturer:          string;
+    readonly discover:              boolean;
+    readonly deviceId:              number  = 0;
     name                            = "";
-    widgets:                BlynkWidgetBase[];
+    widgets:                        BlynkWidgetBase[];
 
     constructor(hap: HAP, log: Logging, baseUrl: string, config: Record<string, string | number | boolean | Record<string,string> | Array<Record<string,string>> >) {
         this.hap = hap;
@@ -122,26 +139,37 @@ export class BlynkDeviceConfig {
         }
 
         this.serverUrl      = `${baseUrl}/${this.token}`;
-        this.manufacturer   = config['manufacturer'] as string    ?? "Wojstead";
-        this.discover       = config['discover'] as boolean        ?? false;
+        this.manufacturer   = config['manufacturer']    as string    ?? "Wojstead";
+        this.discover       = config['discover']        as boolean   ?? false;
 
         this.widgets = new Array<BlynkWidgetBase>();
         if (this.discover === false) {
-            const accList: Array<Record<string, string>> = config['accessories'] as Array<Record<string,string>>
+            const accList: Array<Record<string, string|number>> = config['accessories'] as Array<Record<string,string|number>>
                 ?? function(){ throw new Error(`Discovery is set to false and accessories were not defined.`) };
             /*
                 {
                     "name": "item name",
-                    "type": "BUTTON",
+                    "type": "BUTTON",  {BUTTON, SLIDER, }
                     "pintype": "virtual",
-                    "pinnumber": "1",
+                    "pinnumber": 1,
                     "model": "accessory model"
                 }
             */
            if (accList.length > 0) {
                 accList.forEach((acc: Record<string, string | number>) => {
-                    const accItem: BlynkWidgetButton = new BlynkWidgetButton(this.log, this.serverUrl, acc);
-                    this.widgets.push(accItem);
+                    const widget: IBlynkWidget = {
+                        'id':       acc['id']           as number,
+                        'deviceId': acc['deviceId']     as number ?? 0,
+                        'label':    acc['label']        as string,
+                        'pin':      acc['pinnumber']    as number,
+                        'type':     acc['type']         as string,
+                        'pinType':  acc['pintype']      as string,
+                        'max':      acc['max']          as number,
+                        'min':      acc['min']          as number,
+                        'value':    acc['value']        as string,
+                    };
+                    this.log.info(`Adding accessory: ${widget.label}`);
+                    this.addWidget(widget);
                 });
             }
             else {
@@ -154,43 +182,74 @@ export class BlynkDeviceConfig {
         }
     }
 
+    addWidget(widget: IBlynkWidget): void {
+        if (widget.deviceId === this.deviceId) {
+            switch (widget.type) {
+                case "NUMBER_INPUT":
+                case "TIME_INPUT":
+                case "GAUGE":
+                case "SEGMENTED_CONTROL":
+                case "TABS":
+                case "LCD":
+                    this.log.debug(`addWidget skip: ${widget.label}[${widget.id}] - ${widget.type}`)
+                    break;
+                case "SLIDER":
+                    this.widgets.push( new BlynkWidgetDimmer(this.log, this.serverUrl,
+                        {
+                            "id":           widget.id,
+                            "name":         widget.label,
+                            "label":        widget.label,
+                            "type":         widget.type,
+                            "pintype":      widget.pinType,
+                            "pinnumber":    widget.pin,
+                            "min":          widget.min,
+                            "max":          widget.max,
+                        }
+                    ));
+                    this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
+                    break;
+                case "BUTTON":
+                case "STYLED_BUTTON":
+                    this.widgets.push( new BlynkWidgetButton(this.log, this.serverUrl,
+                        {
+                            "id":           widget.id,
+                            "name":         widget.label,
+                            "label":        widget.label,
+                            "type":         widget.type,
+                            "pintype":      widget.pinType,
+                            "pinnumber":    widget.pin,
+                            "min":          widget.min,
+                            "max":          widget.max,
+                        }
+                    ));
+                    this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
+                    break;
+                default:
+                    this.log.debug(`addWidget skipped item: ${widget.label} is a ${widget.type}`);
+            }
+        }
+    }
+
     async readProject(): Promise<void> {
         const project: IBlynkProject = await this.getProjectJSON();
         this.name = project.name;
 
         project.widgets.forEach( (widget: IBlynkWidget) => {
-            if (widget.deviceId === this.deviceId) {
-                switch (widget.type) {
-                    case "TABS":
-                    case "LCD":
-                        this.log.debug(`Discover skip: ${widget.label}[${widget.id}] - ${widget.type}`)
-                        break;
-                    case "BUTTON":
-                    case "STYLED_BUTTON":
-                        this.widgets.push( new BlynkWidgetButton(this.log, this.serverUrl,
-                            {
-                                "id":           widget.id,
-                                "name":         widget.label,
-                                "label":        widget.label,
-                                "type":         widget.type,
-                                "pintype":      widget.pinType,
-                                "pinnumber":    widget.pin,
-                            }
-                        ));
-                        this.log.info(`Discover found: ${this.widgets.slice(-1)[0].toString()}`);
-                        break;
-                    default:
-                        this.log.debug(`Skipped item: ${widget.label} is a ${widget.type}`);
-                }
-            }
+            this.addWidget(widget);
         })
     }
 
     private async getProjectJSON(): Promise<IBlynkProject> {
         const got = require('got');
+        const options = {
+            dnsCache: true,
+            retry: {
+                limit: 10
+            }
+        };
 
         try {
-            const response = await got(`${this.serverUrl}/project`);
+            const response = await got(`${this.serverUrl}/project`, options)
             return JSON.parse(response.body);
         } catch (error) {
             throw new Error(error);
@@ -213,19 +272,7 @@ interface IBlynkDevice {
     boardType:      string;
     connectionType: string;
     id:             number;
-    isUserIcon:     boolean;
     name:           string;
+    isUserIcon:     boolean;
     vendor:         string;
-}
-
-interface IBlynkWidget {
-    id:         number;         // widget id
-    deviceId:   number;         // id of device the widget is bound to
-    label:      string;         // label of the widget
-    pin:        number;         // pin number the widget is connected to
-    type:       string;         // type of widget, can be anything you want provided it's a BUTTON
-    pinType:    string;         // type of pin used
-    max:        number;
-    min:        number;
-    value:      string;
 }

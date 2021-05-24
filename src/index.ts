@@ -7,6 +7,7 @@ import {
     PlatformAccessory,
     PlatformConfig
 } from "homebridge";
+
 import { BlynkPoller } from "./poller";
 import { BlynkAccessory } from "./accessories";
 
@@ -81,7 +82,7 @@ class BlynkPlatform implements DynamicPlatformPlugin {
             (async() => {
                 // Check to see if this device needs its configuration retrieved.
                 if (device.discover) {
-                    await device.readProject()
+                    await device.readProject().catch((error) => { this.log.error(`error reading project: ${error}`) });
                 }
 
                 device.widgets.forEach( (widget: BlynkWidgetBase) => {
@@ -94,7 +95,7 @@ class BlynkPlatform implements DynamicPlatformPlugin {
                     const accId = hap.uuid.generate(uuidSeed);
                     this.log.debug(`PlatformAccessory: identified ${plugin.name} - ${widget.getId()} [${accId}]`);
 
-                    let haveAcc = this.accs.find( accessory => accessory.UUID === accId);
+                    let haveAcc = this.accs.find(accessory => accessory.UUID === accId);
                     if (!haveAcc) {
                         haveAcc = new Accessory(plugin.name, accId);
 
@@ -104,6 +105,7 @@ class BlynkPlatform implements DynamicPlatformPlugin {
                     else {
                         plugin.attachAccessory(haveAcc);
                     }
+
                     platAccessories.push(haveAcc);
                     plugins.push(plugin);
                 });
