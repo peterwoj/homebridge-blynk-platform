@@ -111,7 +111,7 @@ export class BlynkWidgetButton extends BlynkWidgetBase {
 
         super.requestUrl(this.setPin());
 
-        this.log.warn(`value: ${value} | curValue; ${this.curValue}`);
+        this.log.warn(`setValue() --> value: ${value} | curValue: ${this.curValue}`);
     }
     getValue(): number  {
         try {
@@ -123,10 +123,6 @@ export class BlynkWidgetButton extends BlynkWidgetBase {
         }
         catch (error) {
             this.log.error(`failed on: ${error}`);
-        }
-
-        if (this.getPinNumber() === 0) {
-            this.log.error(`current button value: ${this.curValue}`);
         }
 
         return this.curValue;
