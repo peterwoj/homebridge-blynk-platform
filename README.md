@@ -23,6 +23,7 @@ To expose your Blynk powered devices you have to configure the Homebridge to the
     "platforms": {
         "platform": "BlynkPlatform",
         "serverurl": "http://your.blynkserver.com:8080",
+        "pollerseconds": "20",
         "devices": [
             {
                 "manufacturer": "PeterWoj",
@@ -44,6 +45,15 @@ To expose your Blynk powered devices you have to configure the Homebridge to the
                         "pintype": "VIRTUAL",
                         "pinnumber": 2,
                         "type": "BUTTON"
+                    },
+                    {
+                        "model": "extension-dimmer",
+                        "name": "Dimmed Lights",
+                        "pintype": "VIRTUAL",
+                        "pinnumber": 2,
+                        "type": "SLIDER",
+                        "min": 0,
+                        "max": 100
                     }
                 ]
             }
@@ -54,6 +64,13 @@ To expose your Blynk powered devices you have to configure the Homebridge to the
 Once your configuration is in place startup Homebridge and to get your devices connected to Apple HomeKit.
 
 ## Changelog
+
+### 0.2.6
+
+* Bug fixes 
+ * #12 Missing 'D' from the digital pin requests 
+ * #15 High CPU caused from failed config defaults for pollerseconds.
+ * #14 Additional accessory types, SLIDER is now available
 
 ### 0.2.5
 

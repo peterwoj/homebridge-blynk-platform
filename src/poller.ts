@@ -37,7 +37,6 @@ export class BlynkPoller {
             this.accessories.forEach( accessory => {
                 accessory.getStatus();
             });
-            this.oneAtAtime = false
 
             if (!this.stopPoller) {
                 setTimeout( () => { this.poll() }, this.pollerMilliSeconds);
@@ -45,6 +44,7 @@ export class BlynkPoller {
             else {
                 this.log.info(`Last poller execution due to ask to shutdown.`);
             }
+            this.oneAtAtime = false
         }
 
     }
