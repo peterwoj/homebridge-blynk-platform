@@ -1,6 +1,7 @@
 import {
     Logging,
 } from "homebridge"
+import { HOMEKIT_TYPES } from "./accessories";
 
 
 export interface IBlynkWidget {
@@ -13,8 +14,12 @@ export interface IBlynkWidget {
     max:        number;
     min:        number;
     value:      string;
+    typeOf:     string;         // Type of HomeKit item being implemented
 }
 
+/*
+ Read/Write from blynk.server to homebridge for homekit
+*/
 export abstract class BlynkWidgetBase {
     protected readonly log:         Logging;
     protected readonly baseUrl:     string;
@@ -27,34 +32,36 @@ export abstract class BlynkWidgetBase {
     protected pinNumber:            number;
     protected pinUrlLabel:          string;
     protected pinLabel:             string;
+    protected typeOf:               HOMEKIT_TYPES;
 
     constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {
         this.log        = log;
         this.baseUrl    = baseUrl;
 
-        this.id             = widget['id']              as number   ?? 0;
-        this.name           = widget['name']            as string   ?? "Wojstead Button"
-        this.manufacturer   = widget['manufacturer']    as string   ?? "WojStead";
-        this.widgetType     = widget['type']            as string   ?? "BUTTON";
-        this.pinType        = widget['pintype']         as string   ?? "VIRUTAL";
-        this.pinNumber      = widget['pinnumber']       as number   ?? 0;
-        this.pinLabel       = widget['label']           as string   ?? "missing label here...."
-        this.model          = widget['model']           as string   ?? this.pinLabel;
+        this.id             = widget['id']                   as number   ?? 0;
+        this.typeOf         = HOMEKIT_TYPES[widget['typeOf']?.toString().toUpperCase() as keyof typeof HOMEKIT_TYPES];
+        this.name           = widget['name']                 as string   ?? "Wojstead Button"
+        this.manufacturer   = widget['manufacturer']         as string   ?? "WojStead";
+        this.widgetType     = widget['type']                 as string   ?? "BUTTON";
+        this.pinType        = widget['pintype']              as string   ?? "VIRUTAL";
+        this.pinNumber      = widget['pinnumber']            as number   ?? 0;
+        this.pinLabel       = widget['label']                as string   ?? "missing label here...."
+        this.model          = widget['model']                as string   ?? this.pinLabel;
         this.pinUrlLabel    = (this.pinType.toLowerCase() === 'virtual')
                                     ? `V${this.pinNumber}`
-                                    : `D${this.pinNumber}`
+                                    : `D${this.pinNumber}`;
     }
 
-    getId():            number { return this.id; }
-    getName():          string { return this.name; }
-    getManufacturer():  string { return this.manufacturer; }
-    getModel():         string { return this.model; }
-    getWidgetType():    string { return this.widgetType; }
-    getPinType():       string { return this.pinType; }
-    getPinNumber():     number { return this.pinNumber; }
-    getPinLabel():      string { return this.pinLabel; }
-
-    getPin():           string { return `${this.baseUrl}/get/${this.pinUrlLabel}`; }
+    getId():            number          { return this.id; }
+    getTypeOf():        HOMEKIT_TYPES   { return this.typeOf; }
+    getName():          string          { return this.name; }
+    getManufacturer():  string          { return this.manufacturer; }
+    getModel():         string          { return this.model; }
+    getWidgetType():    string          { return this.widgetType; }
+    getPinType():       string          { return this.pinType; }
+    getPinNumber():     number          { return this.pinNumber; }
+    getPinLabel():      string          { return this.pinLabel; }
+    getPin():           string          { return `${this.baseUrl}/get/${this.pinUrlLabel}`; }
 
     // Blynk server URL to set new value for the pin
     abstract setPin():      string;
@@ -88,12 +95,13 @@ export abstract class BlynkWidgetBase {
     }
 }
 
+// Button translates only to true/false from Homebridge
 export class BlynkWidgetButton extends BlynkWidgetBase {
     private readonly SWITCH_ON:     string = '["1"]';
     private readonly SWITCH_OFF:    string = '["0"]';
 
-    protected minValue:       number;
-    protected maxValue:       number;
+    protected minValue:     number;
+    protected maxValue:     number;
     private curValue:       number;
 
     constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {

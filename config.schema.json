@@ -110,6 +110,9 @@
                                                     "key": "devices[].accessories[].type"
                                                 },
                                                 {
+                                                    "key": "devices[].accessories[].typeOf"
+                                                },
+                                                {
                                                     "key": "devices[].accessories[].pintype"
                                                 },
                                                 {
