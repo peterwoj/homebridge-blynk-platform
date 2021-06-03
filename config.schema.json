@@ -110,6 +110,9 @@
                                                     "key": "devices[].accessories[].type"
                                                 },
                                                 {
+                                                    "key": "devices[].accessories[].typeOf"
+                                                },
+                                                {
                                                     "key": "devices[].accessories[].pintype"
                                                 },
                                                 {
@@ -228,6 +231,28 @@
                                                 "enum": [
                                                     "STYLED_BUTTON"
                                                 ]
+                                            }
+                                        ]
+                                    },
+                                    "typeOf": {
+                                        "title": "Type Of",
+                                        "type": "string",
+                                        "oneOf": [
+                                            {
+                                                "title": "Outlet",
+                                                "enum": ["OUTLET"]
+                                            },
+                                            {
+                                                "title": "Lightbulb",
+                                                "enum": ["LIGHTBULB"]
+                                            },
+                                            {
+                                                "title": "Humidity Sensor",
+                                                "enum": ["HUMIDITY_SENSOR"]
+                                            },
+                                            {
+                                                "title": "Temperature Sensor",
+                                                "enum": ["TEMPERATURE_SENSOR"]
                                             }
                                         ]
                                     }

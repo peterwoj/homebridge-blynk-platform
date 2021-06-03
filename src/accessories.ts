@@ -8,6 +8,22 @@ import {
 
 import { BlynkWidgetBase } from "./widget"
 
+export enum HOMEKIT_TYPES {
+    // BATTERY,
+    // C0_SENSOR           = "C0_SENSOR",
+    // C02_SENSOR          = "C02_SENSOR",
+    // CONTACT_SENSOR      = "CONTACT_SENSOR",
+    HUMIDITY_SENSOR     = "HUMIDITY_SENSOR",
+    // LEAK_SENSOR         = "LEAK_SENSOR",
+    LIGHTBULB           = "LIGHTBULB",
+    // MOTION_SENSOR       = "MOTION_SENSOR",
+    // OCCUPANCY_SENSOR    = "OCCUPANCY_SENSOR",
+    OUTLET              = "OUTLET",
+    // SMOKE_SENSOR        = "SMOKE_SENSOR",
+    TEMPERATURE_SENSOR  = "TEMPERATURE_SENSOR",
+    UNDEFINED           = "UNDEFINED"
+}
+
 export class BlynkAccessory {
     private readonly log: Logging;
     private readonly hap: HAP;
@@ -30,30 +46,98 @@ export class BlynkAccessory {
         this.log.debug(`Switch ${this.name} has been created`);
     }
 
+    // private bindSensor(service: Service | typeof Service, characteristic: CharacteristicValue): boolean {
+    //     if (this.accessory) {
+    //         this.accessoryService = this.accessory.getService(service)
+    //             ?? this.accessory?.addService(service);
+    //         this.accessoryService
+    //             .getCharacteristic(characteristic)
+    //                 .onGet(this.getBrightnessHandler.bind(this));
+    //         return true;
+    //     }
+    //     else {
+    //         return false;
+    //     }
+    // }
+
+    // Determine accessory service from Blynk widget type
+    // can be overridden with "homekitType" to match a HomeKit
+    // type instead.
     attachAccessory(accessory: PlatformAccessory): void {
         this.accessory = accessory;
-
         this.accessory.displayName = this.name;
+        const typeOf: HOMEKIT_TYPES    = this.myConfig.getTypeOf();
+        let serviceType = this.hap.Service.Lightbulb;
 
-        let serviceType = this.hap.Service.Switch;
-        if (this.myConfig.getWidgetType() === "SLIDER") {
-            serviceType = this.hap.Service.Lightbulb;
-        }
+        this.log.info(`${this.myConfig.getName()} is a ${typeOf}`);
 
-        this.accessoryService = this.accessory.getService(serviceType)
-            ?? this.accessory.addService(serviceType);
 
-        this.accessoryService
-            .getCharacteristic(this.hap.Characteristic.On)
-                .onGet(this.getOnHandler.bind(this))
-                .onSet(this.setOnHandler.bind(this));
+        switch (typeOf) {
+            case HOMEKIT_TYPES.OUTLET:
+                serviceType = this.hap.Service.Outlet;
+                this.accessoryService = this.accessory.getService(serviceType)
+                    ?? this.accessory.addService(serviceType);
 
-        if (this.myConfig.getWidgetType() === "SLIDER") {
-            this.accessoryService
-                .getCharacteristic(this.hap.Characteristic.Brightness)
-                    .onGet(this.getBrightnessHandler.bind(this))
-                    .onSet(this.setBrightnessHandler.bind(this));
+                this.accessoryService
+                    .getCharacteristic(this.hap.Characteristic.On)
+                        .onGet(this.getOnHandler.bind(this))
+                        .onSet(this.setOnHandler.bind(this));
+                break;
+            case HOMEKIT_TYPES.LIGHTBULB:
+                serviceType = this.hap.Service.Lightbulb;
+                this.accessoryService = this.accessory.getService(serviceType)
+                    ?? this.accessory.addService(serviceType);
 
+                this.accessoryService
+                    .getCharacteristic(this.hap.Characteristic.On)
+                        .onGet(this.getOnHandler.bind(this))
+                        .onSet(this.setOnHandler.bind(this));
+
+                if (this.myConfig.getWidgetType() === "SLIDER") {
+                    this.accessoryService
+                        .getCharacteristic(this.hap.Characteristic.Brightness)
+                            .onGet(this.getBrightnessHandler.bind(this))
+                            .onSet(this.setBrightnessHandler.bind(this));
+                }
+                break;
+            case HOMEKIT_TYPES.HUMIDITY_SENSOR:
+                serviceType = this.hap.Service.HumiditySensor;
+                this.accessoryService = this.accessory.getService(serviceType)
+                    ?? this.accessory.addService(serviceType);
+
+                this.accessoryService
+                    .getCharacteristic(this.hap.Characteristic.CurrentRelativeHumidity)
+                        .onGet(this.getBrightnessHandler.bind(this));
+                break;
+            case HOMEKIT_TYPES.TEMPERATURE_SENSOR:
+                serviceType = this.hap.Service.TemperatureSensor;
+                this.accessoryService = this.accessory.getService(serviceType)
+                    ?? this.accessory.addService(serviceType);
+
+                this.accessoryService
+                    .getCharacteristic(this.hap.Characteristic.TemperatureDisplayUnits)
+                        .onGet(this.getTemperatureUnit.bind(this));
+
+                this.log.info(`setting temperature sensor`);
+                break;
+            default:
+                serviceType = this.hap.Service.Lightbulb;
+                this.accessoryService = this.accessory.getService(serviceType)
+                    ?? this.accessory.addService(serviceType);
+
+                this.log.debug(`fall through case for attaching events`);
+                this.accessoryService
+                    .getCharacteristic(this.hap.Characteristic.On)
+                        .onGet(this.getOnHandler.bind(this))
+                        .onSet(this.setOnHandler.bind(this));
+
+                if (this.myConfig.getWidgetType() === "SLIDER") {
+                    this.accessoryService
+                        .getCharacteristic(this.hap.Characteristic.Brightness)
+                            .onGet(this.getBrightnessHandler.bind(this))
+                            .onSet(this.setBrightnessHandler.bind(this));
+                }
+                break;
         }
 
         this.accessoryService.getCharacteristic(this.hap.CharacteristicEventTypes.GET)?.getValue()
@@ -66,7 +150,11 @@ export class BlynkAccessory {
             .setCharacteristic(this.hap.Characteristic.Manufacturer, this.myConfig.getManufacturer())
             .setCharacteristic(this.hap.Characteristic.Model, this.myConfig.getModel());
 
-        this.log.debug(`Switch ${this.name} has been attached`);
+        this.log.debug(`${this.myConfig.getTypeOf()} ${this.name} has been attached.`);
+    }
+
+    getTemperatureUnit(): CharacteristicValue {
+        return this.hap.Characteristic.TemperatureDisplayUnits.CELSIUS;
     }
 
     getBrightnessHandler(): number {
@@ -99,7 +187,7 @@ export class BlynkAccessory {
             if (this.myConfig.getWidgetType() === "SLIDER") {
                 const bright = this.accessoryService?.getCharacteristic(this.hap.Characteristic.Brightness)
                 if (bright) {
-                    this.log.debug(`Dimmer(${this.myConfig.getName()}).brightness: ${this.myConfig.getValue()}`);
+                    // this.log.debug(`Dimmer(${this.myConfig.getName()}).brightness: ${this.myConfig.getValue()}`);
                     bright.updateValue( this.myConfig.getValue() );
                 }
             }

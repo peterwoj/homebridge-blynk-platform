@@ -2,6 +2,7 @@ import {
     HAP,
     Logging
 } from "homebridge"
+import { HOMEKIT_TYPES } from "./accessories";
 
 import {
     BlynkWidgetBase,
@@ -32,7 +33,7 @@ import {
                 {
                     "name": "item name",
                     "type": "BUTTON",
-                    "typeOf": "subclass of type",
+                    "typeOf": "homekit control type",
                     "pintype": "virtual",
                     "pinnumber": "1",
                     "model": "accessory model",
@@ -40,7 +41,7 @@ import {
                 {
                     "name": "item name",
                     "type": "LABEL",
-                    "typeOf": "temperature",
+                    "typeOf": "temperature_sensor",
                     "pintype": "virtual",
                     "pinnumber": "1",
                     "model": "accessory model",
@@ -115,7 +116,7 @@ export class BlynkDeviceConfig {
     readonly manufacturer:          string;
     readonly discover:              boolean;
     readonly deviceId:              number  = 0;
-    name                            = "";
+    name                                    = "";
     widgets:                        BlynkWidgetBase[];
 
     constructor(hap: HAP, log: Logging, baseUrl: string, config: Record<string, string | number | boolean | Record<string,string> | Array<Record<string,string>> >) {
@@ -144,8 +145,11 @@ export class BlynkDeviceConfig {
 
         this.widgets = new Array<BlynkWidgetBase>();
         if (this.discover === false) {
-            const accList: Array<Record<string, string|number>> = config['accessories'] as Array<Record<string,string|number>>
-                ?? function(){ throw new Error(`Discovery is set to false and accessories were not defined.`) };
+            if (config['accessories'] === undefined) {
+                this.log.error(`Discovery is set to false and accessories were not defined for ${this.name}.`)
+                return;
+            }
+            const accList: Array<Record<string, string|number>> = config['accessories'] as Array<Record<string,string|number>>;
             /*
                 {
                     "name": "item name",
@@ -167,18 +171,23 @@ export class BlynkDeviceConfig {
                         'max':      acc['max']          as number,
                         'min':      acc['min']          as number,
                         'value':    acc['value']        as string,
+                        'typeOf':   acc['typeOf']       as string ?? HOMEKIT_TYPES.OUTLET
                     };
                     this.log.info(`Adding accessory: ${widget.label}`);
                     this.addWidget(widget);
                 });
             }
             else {
-                this.log.warn(`Accessories were not defined and discover is set to false.`);
+                this.log.warn(`Accessories were not defined and discover is set to false for "${this.name}".`);
             }
         }
         else {
-            this.deviceId = config['deviceId'] as number
-                ?? function() { throw new Error('Discovery is set but missing deviceId to link with token')};
+            if (config['deviceId'] === undefined) {
+                this.log.error(`Discovery is set but missing deviceId to link with token for ${this.name}, will attempt with deviceId 0.`)
+            }
+            else {
+                this.deviceId = config['deviceId'] as number
+            }
         }
     }
 
@@ -204,6 +213,7 @@ export class BlynkDeviceConfig {
                             "pinnumber":    widget.pin,
                             "min":          widget.min,
                             "max":          widget.max,
+                            "typeOf":       widget.typeOf
                         }
                     ));
                     this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
@@ -220,6 +230,7 @@ export class BlynkDeviceConfig {
                             "pinnumber":    widget.pin,
                             "min":          widget.min,
                             "max":          widget.max,
+                            "typeOf":       widget.typeOf
                         }
                     ));
                     this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
@@ -235,8 +246,9 @@ export class BlynkDeviceConfig {
         this.name = project.name;
 
         project.widgets.forEach( (widget: IBlynkWidget) => {
+            widget.typeOf = HOMEKIT_TYPES.OUTLET;
             this.addWidget(widget);
-        })
+        });
     }
 
     private async getProjectJSON(): Promise<IBlynkProject> {
