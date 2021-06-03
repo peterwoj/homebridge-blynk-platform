@@ -91,9 +91,8 @@ class BlynkPlatform implements DynamicPlatformPlugin {
                     const uuidSeed: string = (widget.getId() > 0)
                         ? `${device.token}-${widget.getId().toString()}`
                         : `${device.deviceId}-${device.manufacturer}-${widget.getModel()}-${widget.getPinType()}-${widget.getPinNumber()}`;
-                    this.log.debug(`uuidSeed: ${uuidSeed}`)
                     const accId = hap.uuid.generate(uuidSeed);
-                    this.log.debug(`PlatformAccessory: identified ${plugin.name} - ${widget.getId()} [${accId}]`);
+                    this.log.debug(`PlatformAccessory: identified ${plugin.name}(${widget.getTypeOf()}) - ${widget.getId()} [${accId}]`);
 
                     let haveAcc = this.accs.find(accessory => accessory.UUID === accId);
                     if (!haveAcc) {

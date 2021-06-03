@@ -2,6 +2,7 @@ import {
     HAP,
     Logging
 } from "homebridge"
+import { HOMEKIT_TYPES } from "./accessories";
 
 import {
     BlynkWidgetBase,
@@ -32,7 +33,7 @@ import {
                 {
                     "name": "item name",
                     "type": "BUTTON",
-                    "typeOf": "subclass of type",
+                    "typeOf": "homekit control type",
                     "pintype": "virtual",
                     "pinnumber": "1",
                     "model": "accessory model",
@@ -167,6 +168,7 @@ export class BlynkDeviceConfig {
                         'max':      acc['max']          as number,
                         'min':      acc['min']          as number,
                         'value':    acc['value']        as string,
+                        'typeOf':   acc['typeOf']       as string ?? HOMEKIT_TYPES.UNDEFINED
                     };
                     this.log.info(`Adding accessory: ${widget.label}`);
                     this.addWidget(widget);
@@ -204,6 +206,7 @@ export class BlynkDeviceConfig {
                             "pinnumber":    widget.pin,
                             "min":          widget.min,
                             "max":          widget.max,
+                            "typeOf":       widget.typeOf
                         }
                     ));
                     this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
@@ -220,6 +223,7 @@ export class BlynkDeviceConfig {
                             "pinnumber":    widget.pin,
                             "min":          widget.min,
                             "max":          widget.max,
+                            "typeOf":       widget.typeOf
                         }
                     ));
                     this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
