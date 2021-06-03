@@ -54,6 +54,16 @@ To expose your Blynk powered devices you have to configure the Homebridge to the
                         "type": "SLIDER",
                         "min": 0,
                         "max": 100
+                    },
+                    {
+                        "model": "my-thermometer",
+                        "name": "Dimmed Lights",
+                        "pintype": "VIRTUAL",
+                        "pinnumber": 2,
+                        "type": "SLIDER",
+                        "typeOf": "THERMOMETER_SENSOR",
+                        "min": 0,
+                        "max": 100
                     }
                 ]
             }
@@ -71,6 +81,8 @@ Once your configuration is in place startup Homebridge and to get your devices c
  * #12 Missing 'D' from the digital pin requests 
  * #15 High CPU caused from failed config defaults for pollerseconds.
  * #14 Additional accessory types, SLIDER is now available
+   * Adding HomeKit Sensors as well to relate to defined switches/sliders
+     * HUMIDITY_SENSOR, LIGHTBULB, OUTLET, TEMPERATURE_SENSOR
 
 ### 0.2.5
 
