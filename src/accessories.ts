@@ -1,5 +1,4 @@
 import {
-    Characteristic,
     CharacteristicValue,
     HAP,
     Logging,
