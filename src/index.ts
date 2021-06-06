@@ -40,8 +40,16 @@ let myConfig: BlynkConfig;
 
 class BlynkPlatform implements DynamicPlatformPlugin {
     private readonly log:       Logging;
+    // Loaded from homebridge accessory cache
     private readonly accs:      PlatformAccessory[] =  [];
 
+    // Found in homebridge-blynk-platform plugin configuration
+    // or fetched from blynk-server
+    private plugins:            BlynkAccessory[]    = new Array<BlynkAccessory>();
+    // Accessories currently active, used to filter out what was read
+    // from the accessory cache
+    private platAccessories:    PlatformAccessory[] = [];
+    private needToFetchConfigs                      = 0;
     private poll:               BlynkPoller;
 
     constructor(log: Logging, config: PlatformConfig, homebridge: API) {
@@ -49,6 +57,8 @@ class BlynkPlatform implements DynamicPlatformPlugin {
         myConfig  = new BlynkConfig(homebridge.hap, this.log, config);
         this.poll = new BlynkPoller(log, myConfig.pollerSeconds, []);
 
+        this.needToFetchConfigs = myConfig.devices.length;
+        this.isConfigurtionReady();
 
         api.on(APIEvent.SHUTDOWN, () => {
             this.log.info(`${PLATFORM_NAME} is shutting down.`);
@@ -75,15 +85,13 @@ class BlynkPlatform implements DynamicPlatformPlugin {
         // Prepare a list of available accessories to
         //   1. Bind Homebridge to Blynk event
         //   2. Provide for poller to refresh state
-        const plugins: BlynkAccessory[] = new Array<BlynkAccessory>();
-        const platAccessories: PlatformAccessory[] = [];
-
         myConfig.devices.forEach( (device: BlynkDeviceConfig) => {
             (async() => {
                 // Check to see if this device needs its configuration retrieved.
                 if (device.discover) {
                     await device.readProject().catch((error) => { this.log.error(`error reading project: ${error}`) });
                 }
+                this.needToFetchConfigs--;
 
                 device.widgets.forEach( (widget: BlynkWidgetBase) => {
                     const plugin: BlynkAccessory = new BlynkAccessory(hap, this.log, widget);
@@ -92,12 +100,11 @@ class BlynkPlatform implements DynamicPlatformPlugin {
                         ? `${device.token}-${widget.getId().toString()}`
                         : `${device.deviceId}-${device.manufacturer}-${widget.getModel()}-${widget.getPinType()}-${widget.getPinNumber()}`;
                     const accId = hap.uuid.generate(uuidSeed);
-                    this.log.debug(`PlatformAccessory: identified ${plugin.name}(${widget.getTypeOf()}) - ${widget.getId()} [${accId}]`);
 
+                    this.log.debug(`PlatformAccessory: identified ${plugin.name}(${widget.getTypeOf()}) - ${widget.getId()} [${accId}] seed: ${uuidSeed}`);
                     let haveAcc = this.accs.find(accessory => accessory.UUID === accId);
                     if (!haveAcc) {
                         haveAcc = new Accessory(plugin.name, accId);
-
                         plugin.attachAccessory(haveAcc);
                         api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [haveAcc]);
                     }
@@ -105,25 +112,41 @@ class BlynkPlatform implements DynamicPlatformPlugin {
                         plugin.attachAccessory(haveAcc);
                     }
 
-                    platAccessories.push(haveAcc);
-                    plugins.push(plugin);
+                    this.platAccessories.push(haveAcc);
+                    this.plugins.push(plugin);
                 });
             })();
         });
+    }
 
+    isConfigurtionReady(): void {
+        this.log.debug(`Checking if config is ready: waiting for -> ${this.needToFetchConfigs}`)
+        if (this.needToFetchConfigs <= 0) {
+            this.cleanUpAccessories();
+        }
+        else {
+            setTimeout( () => { this.isConfigurtionReady() }, 500);
+        }
+    }
+
+    cleanUpAccessories() {
         // Remove any found orphans, these are caused by configuration changes
+        this.log.info(`Checking if accessories have been removed to clean up cache.`);
         this.accs
-            .filter(orphan => ! platAccessories.includes(orphan))
+            .filter(orphan => ! this.platAccessories.includes(orphan))
             .forEach(orphan => {
-                this.log.info(`Removing: ${orphan.displayName} - ${orphan.UUID}`);
+                this.log.info(`Removing control: ${orphan.displayName} - ${orphan.UUID}`);
                 api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [orphan])
             });
         this.accs.length = 0;
-        platAccessories.forEach( acc => this.accs.push(acc) );
+        this.platAccessories.forEach( acc => {
+            this.log.debug(`Committing defined accessory(${acc.displayName}) to cache`);
+            this.accs.push(acc);
+        });
 
         // Start the refresh service
         this.poll
-            .setPollerAccessoryList(plugins)
+            .setPollerAccessoryList(this.plugins)
             .poll();
     }
 }

@@ -77,12 +77,15 @@ Once your configuration is in place startup Homebridge and to get your devices c
 
 ### 0.2.6
 
+Default HomeKit type for auto discovery is now an OUTLET.
+
 * Bug fixes 
  * #12 Missing 'D' from the digital pin requests 
  * #15 High CPU caused from failed config defaults for pollerseconds.
  * #14 Additional accessory types, SLIDER is now available
    * Adding HomeKit Sensors as well to relate to defined switches/sliders
      * HUMIDITY_SENSOR, LIGHTBULB, OUTLET, TEMPERATURE_SENSOR
+ * Multiple devices would trigger a refresh on restart of Homebridge.
 
 ### 0.2.5
 
