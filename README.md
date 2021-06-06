@@ -85,10 +85,7 @@ Default HomeKit type for auto discovery is now an OUTLET.
  * #14 Additional accessory types, SLIDER is now available
    * Adding HomeKit Sensors as well to relate to defined switches/sliders
      * HUMIDITY_SENSOR, LIGHTBULB, OUTLET, TEMPERATURE_SENSOR
-<<<<<<< HEAD
  * Multiple devices would trigger a refresh on restart of Homebridge.
-=======
->>>>>>> a6a7c84 (add homekit types to configs)
 
 ### 0.2.5
 

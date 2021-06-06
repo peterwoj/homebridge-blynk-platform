@@ -135,19 +135,11 @@ class BlynkPlatform implements DynamicPlatformPlugin {
         this.accs
             .filter(orphan => ! this.platAccessories.includes(orphan))
             .forEach(orphan => {
-<<<<<<< HEAD
                 this.log.info(`Removing control: ${orphan.displayName} - ${orphan.UUID}`);
                 api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [orphan])
             });
         this.accs.length = 0;
         this.platAccessories.forEach( acc => {
-=======
-                this.log.info(`Removing orphaned control: ${orphan.displayName} - ${orphan.UUID}`);
-                api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [orphan])
-            });
-        this.accs.length = 0;
-        platAccessories.forEach( acc => {
->>>>>>> 042f1c8 (update config schema)
             this.log.debug(`Committing defined accessory(${acc.displayName}) to cache`);
             this.accs.push(acc);
         });
