@@ -76,7 +76,7 @@ export class BlynkAccessory {
         switch (typeOf) {
             case HOMEKIT_TYPES.OUTLET:
                 serviceType = this.hap.Service.Outlet;
-                this.accessoryService = this.accessory.getService(this.hap.Service.Lightbulb)
+                this.accessoryService = this.accessory.getService(serviceType)
                     ?? this.accessory.addService(serviceType);
 
                 this.accessoryService

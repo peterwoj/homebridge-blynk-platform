@@ -91,7 +91,7 @@ export abstract class BlynkWidgetBase {
     }
 
     toString(): string {
-        return `${this.manufacturer} made a ${this.widgetType} named ${this.pinLabel} on pin ${this.pinUrlLabel}`;
+        return `${this.manufacturer} made a ${this.widgetType}(${this.id}) named ${this.pinLabel} on pin ${this.pinUrlLabel}`;
     }
 }
 
@@ -119,7 +119,7 @@ export class BlynkWidgetButton extends BlynkWidgetBase {
 
         super.requestUrl(this.setPin());
 
-        this.log.warn(`setValue() --> value: ${value} | curValue: ${this.curValue}`);
+        this.log.debug(`setValue() --> value: ${value} | curValue: ${this.curValue}`);
     }
     getValue(): number  {
         try {
@@ -151,6 +151,10 @@ export class BlynkWidgetDimmer extends BlynkWidgetBase {
         this.dimmerLow   = widget['min']     as number   ?? 0.0;
         this.dimmerHigh  = widget['max']     as number   ?? 100.0;
         this.dimmerCur   = widget['value']   as number   ?? 0;
+
+        if ( (this.typeOf === HOMEKIT_TYPES.LIGHTBULB) && (this.dimmerHigh > 100) ) {
+            this.dimmerHigh = 100;
+        }
     }
 
     getValue(): number  {
@@ -195,7 +199,7 @@ export class BlynkWidgetDimmer extends BlynkWidgetBase {
         }
 
         super.requestUrl(this.setPin());
-        this.log.error(`new dimmer value: ${tempValue} from ${value}  --> ${this.dimmerCur}`);
+        this.log.debug(`Dimmer(${this.name}) value: ${tempValue} from ${value}  --> ${this.dimmerCur}`);
     }
 
     setDimmerLow(value: number): void {

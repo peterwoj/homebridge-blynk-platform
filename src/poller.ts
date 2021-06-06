@@ -22,7 +22,7 @@ export class BlynkPoller {
     setPollerAccessoryList(accessories: BlynkAccessory[]): BlynkPoller {
         this.accessories.length =  0;
         this.accessories = accessories;
-        this.log.debug(`accessories to scan: ${accessories.length}`);
+        this.log.debug(`Poller will refresh setting for ${accessories.length} item(s).`);
         return this;
     }
 
