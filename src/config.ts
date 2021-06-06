@@ -246,7 +246,12 @@ export class BlynkDeviceConfig {
         this.name = project.name;
 
         project.widgets.forEach( (widget: IBlynkWidget) => {
-            widget.typeOf = HOMEKIT_TYPES.OUTLET;
+            if (widget.type === "SLIDER") {
+                widget.typeOf = HOMEKIT_TYPES.LIGHTBULB;
+            }
+            else {
+                widget.typeOf = HOMEKIT_TYPES.OUTLET;
+            }
             this.addWidget(widget);
         });
     }
