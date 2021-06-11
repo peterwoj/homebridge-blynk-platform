@@ -164,7 +164,7 @@ export class BlynkDeviceConfig {
                     const widget: IBlynkWidget = {
                         'id':       acc['id']           as number,
                         'deviceId': acc['deviceId']     as number ?? 0,
-                        'label':    acc['label']        as string,
+                        'label':    acc['name']         as string,
                         'pin':      acc['pinnumber']    as number,
                         'type':     acc['type']         as string,
                         'pinType':  acc['pintype']      as string,
