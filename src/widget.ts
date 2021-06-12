@@ -15,6 +15,7 @@ export interface IBlynkWidget {
     min:        number;
     value:      string;
     typeOf:     string;         // Type of HomeKit item being implemented
+    model:      string;         // Item model
 }
 
 /*

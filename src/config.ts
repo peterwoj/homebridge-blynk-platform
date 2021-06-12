@@ -108,15 +108,15 @@ export class BlynkConfig {
 
 // Blynk Device is each microcontroller attached to a project
 export class BlynkDeviceConfig {
-    private readonly NEED_CONFIG:   string[] = ['name', 'token'];
+    private readonly NEED_CONFIG:   string[]    = ['name', 'token'];
     private readonly hap:           HAP;
     private readonly log:           Logging;
     private readonly serverUrl:     string;
-    readonly token:                 string  = "";
+    readonly token:                 string      = "";
     readonly manufacturer:          string;
     readonly discover:              boolean;
-    readonly deviceId:              number  = 0;
-    name                                    = "";
+    readonly deviceId:              number      = 0;
+    name                                        = "";
     widgets:                        BlynkWidgetBase[];
 
     constructor(hap: HAP, log: Logging, baseUrl: string, config: Record<string, string | number | boolean | Record<string,string> | Array<Record<string,string>> >) {
@@ -150,16 +150,7 @@ export class BlynkDeviceConfig {
                 return;
             }
             const accList: Array<Record<string, string|number>> = config['accessories'] as Array<Record<string,string|number>>;
-            /*
-                {
-                    "name": "item name",
-                    "type": "BUTTON",  {BUTTON, SLIDER, }
-                    "pintype": "virtual",
-                    "pinnumber": 1,
-                    "model": "accessory model"
-                }
-            */
-           if (accList.length > 0) {
+            if (accList.length > 0) {
                 accList.forEach((acc: Record<string, string | number>) => {
                     const widget: IBlynkWidget = {
                         'id':       acc['id']           as number,
@@ -171,6 +162,7 @@ export class BlynkDeviceConfig {
                         'max':      acc['max']          as number,
                         'min':      acc['min']          as number,
                         'value':    acc['value']        as string,
+                        'model':    acc['model']        as string,
                         'typeOf':   acc['typeOf']       as string ?? HOMEKIT_TYPES.OUTLET
                     };
                     this.log.info(`Adding accessory: ${widget.label}`);
@@ -213,7 +205,9 @@ export class BlynkDeviceConfig {
                             "pinnumber":    widget.pin,
                             "min":          widget.min,
                             "max":          widget.max,
-                            "typeOf":       widget.typeOf
+                            "typeOf":       widget.typeOf,
+                            "model":        widget.model,
+                            "manufacturer": this.manufacturer
                         }
                     ));
                     this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);
@@ -230,7 +224,9 @@ export class BlynkDeviceConfig {
                             "pinnumber":    widget.pin,
                             "min":          widget.min,
                             "max":          widget.max,
-                            "typeOf":       widget.typeOf
+                            "typeOf":       widget.typeOf,
+                            "model":        widget.model,
+                            "manufacturer": this.manufacturer
                         }
                     ));
                     this.log.info(`addWidget found: ${this.widgets.slice(-1)[0].toString()}`);

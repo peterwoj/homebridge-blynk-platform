@@ -120,12 +120,13 @@ class BlynkPlatform implements DynamicPlatformPlugin {
     }
 
     isConfigurtionReady(): void {
-        this.log.debug(`Checking if config is ready: waiting for -> ${this.needToFetchConfigs}`)
+        const waitForConfigInMilliSeconds   = 500;
+        this.log.debug(`Checking if config is ready: waiting for ${waitForConfigInMilliSeconds} ms remaining configs to fetch: ${this.needToFetchConfigs}`)
         if (this.needToFetchConfigs <= 0) {
             this.cleanUpAccessories();
         }
         else {
-            setTimeout( () => { this.isConfigurtionReady() }, 500);
+            setTimeout( () => { this.isConfigurtionReady() }, waitForConfigInMilliSeconds);
         }
     }
 
