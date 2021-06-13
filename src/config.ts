@@ -52,11 +52,14 @@ import {
 }
 
 Config will hold devices
-a device contains widgets
+  - device contains widgets
 
 */
 
 export class BlynkConfig {
+    readonly DEFAULT_PLATFORM_NAME          = "BlynkPlatform";
+    readonly DEFAULT_BLYNK_POLLER_SECONDS   = 10;
+
     private readonly NEED_CONFIG:   string[] = ['serverurl', 'devices'];
     private readonly hap:           HAP;
     private readonly log:           Logging;
@@ -69,7 +72,7 @@ export class BlynkConfig {
         this.hap = hap;
         this.log = log;
 
-        for ( const confKey of this.NEED_CONFIG) {
+        for (const confKey of this.NEED_CONFIG) {
 
             const confValue = config[confKey]
                 ?? function(){ throw new Error(`Missing configuration for ${confKey}`) }
@@ -88,8 +91,8 @@ export class BlynkConfig {
             }
         }
 
-        this.platform       = String(config['platform'])        || "BlynkPlatform";
-        this.pollerSeconds  = Number(config['pollerseconds'])   || 10;
+        this.platform       = String(config['platform'])        || this.DEFAULT_PLATFORM_NAME;
+        this.pollerSeconds  = Number(config['pollerseconds'])   || this.DEFAULT_BLYNK_POLLER_SECONDS;
 
         this.devices = new Array<BlynkDeviceConfig>();
 

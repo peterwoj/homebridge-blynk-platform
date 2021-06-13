@@ -46,20 +46,6 @@ export class BlynkAccessory {
         this.log.debug(`Switch ${this.name} has been created`);
     }
 
-    // private bindSensor(service: Service | typeof Service, characteristic: CharacteristicValue): boolean {
-    //     if (this.accessory) {
-    //         this.accessoryService = this.accessory.getService(service)
-    //             ?? this.accessory?.addService(service);
-    //         this.accessoryService
-    //             .getCharacteristic(characteristic)
-    //                 .onGet(this.getBrightnessHandler.bind(this));
-    //         return true;
-    //     }
-    //     else {
-    //         return false;
-    //     }
-    // }
-
     // Determine accessory service from Blynk widget type
     // can be overridden with "homekitType" to match a HomeKit
     // type instead.

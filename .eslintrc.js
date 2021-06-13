@@ -15,7 +15,12 @@ module.exports = {
         {
             files: ["*"],
             rules: {
-                "@typescript-eslint/no-var-requires": "off"
+                "@typescript-eslint/no-var-requires": "off",
+                "@typescript-eslint/ban-ts-comment": [ "error", {
+                        "ts-ignore": "allow-with-description",
+                        "minimumDescriptionLength": 10
+                    }
+                ]
             }
         }
     ],

@@ -46,7 +46,7 @@ export abstract class BlynkWidgetBase {
         this.widgetType     = widget['type']                 as string   ?? "BUTTON";
         this.pinType        = widget['pintype']              as string   ?? "VIRUTAL";
         this.pinNumber      = widget['pinnumber']            as number   ?? 0;
-        this.pinLabel       = widget['label']                as string   ?? "missing label here...."
+        this.pinLabel       = widget['label']                as string   ?? `${this.name}`
         this.model          = widget['model']                as string   ?? this.pinLabel;
         this.pinUrlLabel    = (this.pinType.toLowerCase() === 'virtual')
                                     ? `V${this.pinNumber}`
