@@ -1,5 +1,4 @@
 import {
-    HAP,
     Logging
 } from "homebridge"
 import { HOMEKIT_TYPES } from "./accessories";
@@ -61,15 +60,13 @@ export class BlynkConfig {
     readonly DEFAULT_BLYNK_POLLER_SECONDS   = 10;
 
     private readonly NEED_CONFIG:   string[] = ['serverurl', 'devices'];
-    private readonly hap:           HAP;
     private readonly log:           Logging;
     private readonly baseUrl:       string = "";
     readonly platform:              string;
     readonly pollerSeconds:         number;
     devices:                        BlynkDeviceConfig[];
 
-    constructor(hap: HAP, log: Logging, config:Record<string, unknown>) {
-        this.hap = hap;
+    constructor(log: Logging, config:Record<string, unknown>) {
         this.log = log;
 
         for (const confKey of this.NEED_CONFIG) {
@@ -99,7 +96,7 @@ export class BlynkConfig {
         const confDevices: Record<string, string | number>[] = config['devices'] as Record<string, string | number>[];
         if (confDevices != undefined) {
             confDevices.forEach((device: Record<string, string|number>) => {
-                const deviceConfig = new BlynkDeviceConfig(this.hap, this.log, this.baseUrl, device);
+                const deviceConfig = new BlynkDeviceConfig(this.log, this.baseUrl, device);
                 this.devices.push(deviceConfig);
             });
         }
@@ -112,7 +109,6 @@ export class BlynkConfig {
 // Blynk Device is each microcontroller attached to a project
 export class BlynkDeviceConfig {
     private readonly NEED_CONFIG:   string[]    = ['name', 'token'];
-    private readonly hap:           HAP;
     private readonly log:           Logging;
     private readonly serverUrl:     string;
     readonly token:                 string      = "";
@@ -122,8 +118,7 @@ export class BlynkDeviceConfig {
     name                                        = "";
     widgets:                        BlynkWidgetBase[];
 
-    constructor(hap: HAP, log: Logging, baseUrl: string, config: Record<string, string | number | boolean | Record<string,string> | Array<Record<string,string>> >) {
-        this.hap = hap;
+    constructor(log: Logging, baseUrl: string, config: Record<string, string | number | boolean | Record<string,string> | Array<Record<string,string>> >) {
         this.log = log;
 
         for ( const confKey of this.NEED_CONFIG) {

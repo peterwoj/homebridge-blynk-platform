@@ -1,6 +1,18 @@
 import { HOMEKIT_TYPES } from "../src/accessories";
 import { BlynkConfig, BlynkDeviceConfig } from "../src/config";
 
+
+const verbose = false;
+const log = () => { /* establish a test logger */ };
+log.prefix = 'testLogger: ';
+//@ts-ignore: implicit-any for here
+log.logMessage = (message, ...params) => { if (verbose) { console.log(message, ...params); } };
+log.debug      = (message, ...params) => { log.logMessage(`debug: ${message}`, ...params)};
+log.info       = (message, ...params) => { log.logMessage(`info: ${message}`, ...params)};
+log.warn       = (message, ...params) => { log.logMessage(`warn: ${message}`, ...params)};
+log.error      = (message, ...params) => { log.logMessage(`error: ${message}`, ...params)};
+log.log        = () => { /* empty body */ };
+
 describe('BlynkConfig using defaults', () => {
   const blynkPlatformConfigJson =
     {
@@ -34,25 +46,11 @@ describe('BlynkConfig using defaults', () => {
         ]
     };
 
-    const verbose                 = false;
     let blynkConfig: BlynkConfig;
     const hapMock = jest.createMockFromModule('homebridge');
-    const logMock = jest.createMockFromModule('homebridge/lib/logger');
-
-    //@ts-ignore: implicit-any for here
-    function logMessage(message: string, ...params): void {
-      if (verbose) {
-        console.log(message, ...params);
-      }
-    }
 
     beforeAll(() => {
-      logMock.debug = jest.fn((message, ...params)  => { logMessage(`debug: ${message}`, ...params)});
-      logMock.info  = jest.fn((message, ...params)  => { logMessage(`info: ${message}`, ...params)});
-      logMock.warn  = jest.fn((message, ...params)  => { logMessage(`warn: ${message}`, ...params)});
-      logMock.error = jest.fn((message, ...params)  => { logMessage(`error: ${message}`, ...params)});
-
-      blynkConfig = new BlynkConfig(hapMock, logMock, blynkPlatformConfigJson);
+      blynkConfig = new BlynkConfig(log, blynkPlatformConfigJson);
     });
 
     test('BlynkConfig has been defined', () => {
@@ -129,24 +127,10 @@ describe('BlynkConfig Fully Definied', () => {
     };
 
   let blynkConfig: BlynkConfig;
-  const verbose = false;
   const hapMock = jest.createMockFromModule('homebridge');
-  const logMock = jest.createMockFromModule('homebridge/lib/logger');
-
-  //@ts-ignore: implicit-any
-  function logMessage(message: string, ...params): void {
-    if (verbose) {
-      console.log(message, ...params);
-    }
-  }
 
   beforeAll(() => {
-    logMock.debug = jest.fn((message, ...params)  => { logMessage(`debug: ${message}`, ...params)});
-    logMock.info  = jest.fn((message, ...params)  => { logMessage(`info: ${message}`, ...params)});
-    logMock.warn  = jest.fn((message, ...params)  => { logMessage(`warn: ${message}`, ...params)});
-    logMock.error = jest.fn((message, ...params)  => { logMessage(`error: ${message}`, ...params)});
-
-    blynkConfig = new BlynkConfig(hapMock, logMock, blynkPlatformConfigJson);
+    blynkConfig = new BlynkConfig(log, blynkPlatformConfigJson);
   });
 
   test('BlynkConfig has been defined', () => {

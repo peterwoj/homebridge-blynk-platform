@@ -3,8 +3,8 @@
 Plugin for Homebridge to allow Blynk applications to be controlled throug Apple HomeKit.
 
 <div style="text-align:center;">
-<a href="https://www.npmjs.com/package/homebridge-blynk-platform"><img title="npm version" src="https://badgen.net/npm/v/homebridge-blynk-platform" /></a>
-<a href="https://www.npmjs.com/package/homebridge-blynk-platform"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-blynk-platform" /></a>
+<a href="https://www.npmjs.com/package/homebridge-blynk-platform"><img title="npm version" src="https://badgen.net/npm/v/homebridge-blynk-platform?icon=npm&label=release" /></a>
+<a href="https://www.npmjs.com/package/homebridge-blynk-platform"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-blynk-platform?icon=npm" /></a>
 </div>
 
 ## Installation
@@ -27,7 +27,7 @@ To expose your Blynk powered devices you have to configure the Homebridge to the
         "devices": [
             {
                 "manufacturer": "PeterWoj",
-                "name": "HabitController",
+                "name": "HabitatController",
                 "token": "1e6aa4f587664ed74c8195842d2f1a8d",
                 "deviceId": "31225",
                 "discover": true

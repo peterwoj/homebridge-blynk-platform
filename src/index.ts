@@ -17,11 +17,14 @@ import {
 } from "./config"
 
 import {
+    PACKGE_CONFIG,
+    PLUGIN_NAME,
+    PLATFORM_NAME
+} from "./settings"
+
+import {
     BlynkWidgetBase
 } from "./widget"
-
-const PLUGIN_NAME        = "homebridge-blynk-platform"
-const PLATFORM_NAME      = "BlynkPlatform"
 
 let api: API;
 let hap: HAP;
@@ -54,11 +57,20 @@ class BlynkPlatform implements DynamicPlatformPlugin {
 
     constructor(log: Logging, config: PlatformConfig, homebridge: API) {
         this.log = log;
-        myConfig  = new BlynkConfig(homebridge.hap, this.log, config);
-        this.poll = new BlynkPoller(log, myConfig.pollerSeconds, []);
+        myConfig  = new BlynkConfig(this.log, config);
+        this.poll = new BlynkPoller(this.log, myConfig.pollerSeconds, []);
 
         this.needToFetchConfigs = myConfig.devices.length;
         this.isConfigurtionReady();
+
+        this.log.info(
+            '%s v%s, node %s, homebridge v%s, api v%s',
+            PACKGE_CONFIG.name,
+            PACKGE_CONFIG.version,
+            process.version,
+            api.serverVersion,
+            api.version
+          );
 
         api.on(APIEvent.SHUTDOWN, () => {
             this.log.info(`${PLATFORM_NAME} is shutting down.`);
