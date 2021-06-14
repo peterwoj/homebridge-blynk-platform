@@ -24,6 +24,7 @@ export enum HOMEKIT_TYPES {
     UNDEFINED           = "UNDEFINED"
 }
 
+// Link the Blynk defined accessory to HomeKit
 export class BlynkAccessory {
     private readonly log: Logging;
     private readonly hap: HAP;
@@ -82,8 +83,8 @@ export class BlynkAccessory {
                 if (this.myConfig.getWidgetType() === "SLIDER") {
                     this.accessoryService
                         .getCharacteristic(this.hap.Characteristic.Brightness)
-                            .onGet(this.getBrightnessHandler.bind(this))
-                            .onSet(this.setBrightnessHandler.bind(this));
+                            .onGet(this.getNumericValueOnBlynkWidget.bind(this))
+                            .onSet(this.setNumericValueOnBlynkWidget.bind(this));
                 }
                 break;
             case HOMEKIT_TYPES.HUMIDITY_SENSOR:
@@ -93,7 +94,7 @@ export class BlynkAccessory {
 
                 this.accessoryService
                     .getCharacteristic(this.hap.Characteristic.CurrentRelativeHumidity)
-                        .onGet(this.getBrightnessHandler.bind(this));
+                        .onGet(this.getNumericValueOnBlynkWidget.bind(this));
                 break;
             case HOMEKIT_TYPES.TEMPERATURE_SENSOR:
                 serviceType = this.hap.Service.TemperatureSensor;
@@ -120,8 +121,8 @@ export class BlynkAccessory {
                 if (this.myConfig.getWidgetType() === "SLIDER") {
                     this.accessoryService
                         .getCharacteristic(this.hap.Characteristic.Brightness)
-                            .onGet(this.getBrightnessHandler.bind(this))
-                            .onSet(this.setBrightnessHandler.bind(this));
+                            .onGet(this.getNumericValueOnBlynkWidget.bind(this))
+                            .onSet(this.setNumericValueOnBlynkWidget.bind(this));
                 }
                 break;
         }
@@ -143,11 +144,11 @@ export class BlynkAccessory {
         return this.hap.Characteristic.TemperatureDisplayUnits.CELSIUS;
     }
 
-    getBrightnessHandler(): number {
+    getNumericValueOnBlynkWidget(): number {
         return this.myConfig.getValue();
     }
 
-    setBrightnessHandler(value: CharacteristicValue): void {
+    setNumericValueOnBlynkWidget(value: CharacteristicValue): void {
         this.myConfig.setValue(`["${value.toString()}"]`);
     }
 
