@@ -27,7 +27,7 @@ To expose your Blynk powered devices you have to configure the Homebridge to the
         "devices": [
             {
                 "manufacturer": "PeterWoj",
-                "name": "HabitController",
+                "name": "HabitatController",
                 "token": "1e6aa4f587664ed74c8195842d2f1a8d",
                 "deviceId": "31225",
                 "discover": true
