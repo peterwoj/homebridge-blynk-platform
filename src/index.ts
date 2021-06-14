@@ -119,13 +119,16 @@ class BlynkPlatform implements DynamicPlatformPlugin {
         });
     }
 
+    // Clean up the accessory cache once all devices
+    // have had their configurations defined.
     isConfigurtionReady(): void {
-        this.log.debug(`Checking if config is ready: waiting for -> ${this.needToFetchConfigs}`)
+        const waitForConfigInMilliSeconds   = 500;
+        this.log.debug(`Checking if config is ready: waiting for ${waitForConfigInMilliSeconds} ms remaining configs to fetch: ${this.needToFetchConfigs}`)
         if (this.needToFetchConfigs <= 0) {
             this.cleanUpAccessories();
         }
         else {
-            setTimeout( () => { this.isConfigurtionReady() }, 500);
+            setTimeout( () => { this.isConfigurtionReady() }, waitForConfigInMilliSeconds);
         }
     }
 
@@ -135,7 +138,7 @@ class BlynkPlatform implements DynamicPlatformPlugin {
         this.accs
             .filter(orphan => ! this.platAccessories.includes(orphan))
             .forEach(orphan => {
-                this.log.info(`Removing control: ${orphan.displayName} - ${orphan.UUID}`);
+                this.log.info(`Removing accessory: ${orphan.displayName} - ${orphan.UUID}`);
                 api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [orphan])
             });
         this.accs.length = 0;
