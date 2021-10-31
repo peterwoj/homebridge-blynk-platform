@@ -173,10 +173,10 @@ export class BlynkDeviceConfig {
         }
         else {
             if (config['deviceId'] === undefined) {
-                this.log.error(`Discovery is set but missing deviceId to link with token for ${this.name}, will attempt with deviceId 0.`)
+                this.log.error(`Discovery is set but missing deviceId to link with token for ${this.name}, will attempt with deviceId 0.`);
             }
             else {
-                this.deviceId = config['deviceId'] as number
+                this.deviceId = +config['deviceId'];
             }
         }
     }
