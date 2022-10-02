@@ -268,7 +268,12 @@ export class BlynkDeviceConfig {
             const response = await got(`${this.serverUrl}/project`, options)
             return JSON.parse(response.body);
         } catch (error) {
-            throw new Error(error);
+            if (error instanceof Error) {
+                throw new Error(error.message);
+            }
+            else {
+                throw new Error("Unknown nonsense thrown...");
+            }
         }
     }
 }

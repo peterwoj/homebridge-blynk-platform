@@ -1,3 +1,9 @@
+### 0.3.0 (2022-10-02)
+
+##### Chores
+
+* **versions:**  bump all version to latest ([53aee38b](https://github.com/peterwoj/homebridge-blynk-platform/commit/53aee38b1df417d6f3411144b363e238cfa12060))
+
 #### 0.2.7 (2021-06-20)
 
 ##### Bug Fixes
