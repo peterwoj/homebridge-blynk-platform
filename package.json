@@ -1,7 +1,7 @@
 {
     "name": "homebridge-blynk-platform",
     "displayName": "Homebridge Blynk Platform",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Homebridge plugin for the Blynk platform",
     "main": "dist/index.js",
     "scripts": {
@@ -35,18 +35,18 @@
         "url": "https://github.com/peterwoj/homebridge-blynk-platform/issues"
     },
     "devDependencies": {
-        "@types/node": "18.7.23",
+        "@homebridge/plugin-ui-utils": "^0.0.19",
         "@types/jest": "^27.5.1",
+        "@types/node": "^18.7.23",
         "@typescript-eslint/eslint-plugin": "^5.38.1",
         "@typescript-eslint/parser": "^5.38.1",
-        "@homebridge/plugin-ui-utils": "^0.0.19",
         "eslint": "^8.24.0",
         "generate-changelog": "^1.8.0",
         "homebridge": "^1.5.0",
         "homebridge-config-ui-x": "^4.50.1",
+        "jest": "^27.5.1",
         "rimraf": "^3.0.2",
-        "typescript": "^4.8.4",
-        "jest": "^27.5.1"
+        "typescript": "^4.8.4"
     },
     "homepage": "https://github.com/peterwoj/homebridge-blynk-platform",
     "dependencies": {

@@ -24,6 +24,7 @@ export interface IBlynkWidget {
 export abstract class BlynkWidgetBase {
     protected readonly log:         Logging;
     protected readonly baseUrl:     string;
+    protected readonly token:       string;
     protected id:                   number;
     protected name:                 string;
     protected manufacturer:         string;
@@ -35,9 +36,10 @@ export abstract class BlynkWidgetBase {
     protected pinLabel:             string;
     protected typeOf:               HOMEKIT_TYPES;
 
-    constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {
+    constructor(log: Logging, baseUrl: string, token: string, widget: Record<string, string | number>) {
         this.log        = log;
         this.baseUrl    = baseUrl;
+        this.token      = token;
 
         this.id             = widget['id']                   as number   ?? 0;
         this.typeOf         = HOMEKIT_TYPES[widget['typeOf']?.toString().toUpperCase() as keyof typeof HOMEKIT_TYPES];
@@ -62,7 +64,7 @@ export abstract class BlynkWidgetBase {
     getPinType():       string          { return this.pinType; }
     getPinNumber():     number          { return this.pinNumber; }
     getPinLabel():      string          { return this.pinLabel; }
-    getPin():           string          { return `${this.baseUrl}/get/${this.pinUrlLabel}`; }
+    getPin():           string          { return `${this.baseUrl}/get?token=${this.token}&${this.pinUrlLabel}`; }
 
     // Blynk server URL to set new value for the pin
     abstract setPin():      string;
@@ -98,22 +100,22 @@ export abstract class BlynkWidgetBase {
 
 // Button translates only to true/false from Homebridge
 export class BlynkWidgetButton extends BlynkWidgetBase {
-    private readonly SWITCH_ON:     string = '["1"]';
-    private readonly SWITCH_OFF:    string = '["0"]';
+    private readonly SWITCH_ON:     string = '["0"]';
+    private readonly SWITCH_OFF:    string = '["1"]';
 
     protected minValue:     number;
     protected maxValue:     number;
     private curValue:       number;
 
-    constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {
-        super(log, baseUrl, widget);
+    constructor(log: Logging, baseUrl: string, token: string, widget: Record<string, string | number>) {
+        super(log, baseUrl, token, widget);
         this.minValue   = widget['min']     as number   ?? 0.0;
         this.maxValue   = widget['max']     as number   ?? 1.0;
         this.curValue   = widget['value']   as number   ?? 0;
     }
 
     setPin(): string {
-        return `${this.baseUrl}/update/${this.pinUrlLabel}?value=${this.curValue}`;
+        return `${this.baseUrl}/update?token=${this.token}&${this.pinUrlLabel}=${this.curValue}`;
     }
     setValue(value: string): void {
         this.curValue = (value === 'true') ? 1 : 0;
@@ -147,8 +149,8 @@ export class BlynkWidgetDimmer extends BlynkWidgetBase {
     private dimmerHigh      = 100;
     private dimmerCur       = 0;
 
-    constructor(log: Logging, baseUrl: string, widget: Record<string, string | number>) {
-        super(log, baseUrl, widget);
+    constructor(log: Logging, baseUrl: string, token: string, widget: Record<string, string | number>) {
+        super(log, baseUrl, token, widget);
         this.dimmerLow   = widget['min']     as number   ?? 0.0;
         this.dimmerHigh  = widget['max']     as number   ?? 100.0;
         this.dimmerCur   = widget['value']   as number   ?? 0;
@@ -177,7 +179,7 @@ export class BlynkWidgetDimmer extends BlynkWidgetBase {
     getMax():   number  { return this.dimmerHigh; }
 
     setPin(): string {
-        return `${this.baseUrl}/update/${this.pinUrlLabel}?value=${+this.dimmerCur}`;
+        return `${this.baseUrl}/update?token=${this.token}&${this.pinUrlLabel}=${+this.dimmerCur}`;
     }
 
     setValue(value: string): void {

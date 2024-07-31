@@ -90,7 +90,7 @@ describe('BlynkConfig using defaults', () => {
       expect(blynkWidget.getPinLabel()).toBe("Wojstead Button");
 
       expect(blynkDevices[0].widgets[1].getTypeOf()).toBe(HOMEKIT_TYPES.TEMPERATURE_SENSOR);
-      expect(blynkDevices[0].widgets[1].getPin()).toBe(`http://wwww.blynk.server/auth-token/get/V111`);
+      expect(blynkDevices[0].widgets[1].getPin()).toBe(`http://wwww.blynk.server/external/api/get?token=auth-token&V111`);
      })
 });
 
@@ -184,7 +184,7 @@ describe('BlynkConfig Fully Definied', () => {
     expect(blynkWidget.getPinLabel()).toBe("item name");
 
     expect(blynkDevices[0].widgets[1].getTypeOf()).toBe(HOMEKIT_TYPES.TEMPERATURE_SENSOR);
-    expect(blynkDevices[0].widgets[1].getPin()).toBe(`http://wwww.blynk.server/auth-token/get/V111`);
+    expect(blynkDevices[0].widgets[1].getPin()).toBe(`http://wwww.blynk.server/external/api/get?token=auth-token&V111`);
    })
 })
 

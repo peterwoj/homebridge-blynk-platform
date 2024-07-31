@@ -142,7 +142,7 @@ export class BlynkDeviceConfig {
             }
         }
 
-        this.serverUrl      = `${baseUrl}/${this.token}`;
+        this.serverUrl      = `${baseUrl}/external/api`;
         this.manufacturer   = config['manufacturer']    as string    ?? "Wojstead";
         this.discover       = config['discover']        as boolean   ?? false;
 
@@ -198,7 +198,7 @@ export class BlynkDeviceConfig {
                     this.log.debug(`addWidget skip: ${widget.label}[${widget.id}] - ${widget.type}`)
                     break;
                 case "SLIDER":
-                    this.widgets.push( new BlynkWidgetDimmer(this.log, this.serverUrl,
+                    this.widgets.push( new BlynkWidgetDimmer(this.log, this.serverUrl, this.token,
                         {
                             "id":           widget.id,
                             "name":         widget.label,
@@ -217,7 +217,7 @@ export class BlynkDeviceConfig {
                     break;
                 case "BUTTON":
                 case "STYLED_BUTTON":
-                    this.widgets.push( new BlynkWidgetButton(this.log, this.serverUrl,
+                    this.widgets.push( new BlynkWidgetButton(this.log, this.serverUrl, this.token,
                         {
                             "id":           widget.id,
                             "name":         widget.label,
